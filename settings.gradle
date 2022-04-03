@@ -1,5 +1,5 @@
 rootProject.name = 'audio-service'
 
-include 'service'
-include 'model'
-include 'api'
+include 'audio-service'
+include 'audio-model'
+include 'audio-api'

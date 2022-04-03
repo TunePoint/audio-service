@@ -4,7 +4,7 @@ plugins {
 
 dependencies {
 
-    implementation project(':model')
+    implementation project(':audio-model')
 
     implementation 'org.springframework.boot:spring-boot-starter-web'
 }

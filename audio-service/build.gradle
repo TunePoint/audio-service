@@ -5,7 +5,7 @@ plugins {
 }
 
 dependencies {
-    implementation project(':model')
+    implementation project(':audio-model')
 
     implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
     implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
