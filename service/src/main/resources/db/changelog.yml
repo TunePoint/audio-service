@@ -1,0 +1,8 @@
+databaseChangeLog:
+  - changeSet:
+      id: audio-1
+      author: tunepoint
+      changes:
+        - sqlFile:
+            splitStatements: false
+            path: schema/init.sql

@@ -1,0 +1,58 @@
+plugins {
+    id 'org.springframework.boot'
+    id 'java-library'
+    id 'com.google.cloud.tools.jib'
+}
+
+dependencies {
+    implementation project(':model')
+
+    implementation 'org.springframework.cloud:spring-cloud-starter-netflix-eureka-client'
+    implementation 'org.springframework.cloud:spring-cloud-starter-openfeign'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+
+    implementation 'org.liquibase:liquibase-core'
+    implementation 'org.mapstruct:mapstruct'
+    implementation 'com.auth0:java-jwt'
+
+    implementation 'ua.tunepoint:commons-security'
+    implementation 'ua.tunepoint:resource-api'
+    implementation 'ua.tunepoint:resource-model'
+    implementation 'ua.tunepoint:commons-web-model'
+    implementation 'ua.tunepoint:commons-web-exception'
+    implementation 'ua.tunepoint:account-api'
+    implementation 'ua.tunepoint:account-model'
+
+    compileOnly 'org.projectlombok:lombok'
+    compileOnly 'org.mapstruct:mapstruct-processor'
+    runtimeOnly 'org.postgresql:postgresql'
+
+    annotationProcessor 'org.projectlombok:lombok'
+    annotationProcessor 'org.mapstruct:mapstruct-processor'
+    annotationProcessor 'org.springframework.boot:spring-boot-configuration-processor'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+bootJar {
+    archiveName "${project.name}.jar"
+}
+
+jib {
+    from {
+        image dockerImage
+    }
+
+    to {
+        image "docker.io/tunepoint/${project.name}:${project.version}"
+
+        auth {
+            username System.getenv('DOCKER_USERNAME') ?: 'default'
+            password System.getenv('DOCKER_PASSWORD') ?: 'default'
+        }
+    }
+}
