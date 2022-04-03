@@ -12,7 +12,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    implementation 'org.springframework.kafka:spring-kafka'
 
     implementation 'org.liquibase:liquibase-core'
     implementation 'org.mapstruct:mapstruct'
@@ -23,7 +22,6 @@ dependencies {
     implementation 'ua.tunepoint:resource-model'
     implementation 'ua.tunepoint:commons-web-model'
     implementation 'ua.tunepoint:commons-web-exception'
-    implementation 'ua.tunepoint:commons-event'
     implementation 'ua.tunepoint:account-api'
     implementation 'ua.tunepoint:account-model'
 
