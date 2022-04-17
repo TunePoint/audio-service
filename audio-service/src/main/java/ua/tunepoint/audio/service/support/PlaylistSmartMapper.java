@@ -21,8 +21,8 @@ public class PlaylistSmartMapper {
 
     public PlaylistPayload toPayload(Playlist playlist, Resource cover) {
 
-        User user = userService.findUser(playlist.getAuthorId())
-                .orElseThrow(() -> new NotFoundException("User with id " + playlist.getAuthorId() + " was not found"));
+        User user = userService.findUser(playlist.getOwnerId())
+                .orElseThrow(() -> new NotFoundException("User with id " + playlist.getOwnerId() + " was not found"));
 
         return playlistMapper.toPayload(playlist, cover, user);
     }
@@ -35,8 +35,8 @@ public class PlaylistSmartMapper {
                     .orElseThrow(() -> new NotFoundException("Image with id " + playlist.getCoverId() + " was not found" ));
         }
 
-        User user = userService.findUser(playlist.getAuthorId())
-                .orElseThrow(() -> new NotFoundException("User with id " + playlist.getAuthorId() + " was not found"));
+        User user = userService.findUser(playlist.getOwnerId())
+                .orElseThrow(() -> new NotFoundException("User with id " + playlist.getOwnerId() + " was not found"));
 
         return playlistMapper.toPayload(playlist, cover, user);
     }

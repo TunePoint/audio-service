@@ -11,7 +11,7 @@ CREATE TABLE audio.genres
 CREATE TABLE audio.audio
 (
     id SERIAL PRIMARY KEY,
-    author_id BIGINT NOT NULL,
+    owner_id BIGINT NOT NULL,
     title VARCHAR(255) NOT NULL,
     content_id VARCHAR(64) NOT NULL,
     cover_id VARCHAR(64),
@@ -92,7 +92,7 @@ CREATE TABLE audio.playlists
     id SERIAL PRIMARY KEY,
     title VARCHAR(64),
     description VARCHAR(256),
-    author_id BIGINT NOT NULL,
+    owner_id BIGINT NOT NULL,
     is_private BOOLEAN DEFAULT FALSE,
     cover_id VARCHAR
 );
@@ -110,7 +110,7 @@ CREATE TABLE audio.playlists_likes
     user_id INTEGER NOT NULL,
     created_at TIMESTAMP,
 
-    CONSTRAINT playlist_likes_ok PRIMARY KEY (playlist_id, user_id)
+    CONSTRAINT playlist_likes_pk PRIMARY KEY (playlist_id, user_id)
 );
 
 CREATE TABLE audio.playlists_stats

@@ -13,7 +13,7 @@ public class AudioVisibilityAccessManager implements AccessManager<UserPrincipal
 
     @Override
     public void authorize(UserPrincipal userIdentity, Audio objectIdentity) {
-        if (objectIdentity.getIsPrivate() && !Objects.equals(objectIdentity.getAuthorId(), extractId(userIdentity)))  {
+        if (objectIdentity.getIsPrivate() && !Objects.equals(objectIdentity.getOwnerId(), extractId(userIdentity)))  {
             throw new ForbiddenException();
         }
     }

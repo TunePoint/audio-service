@@ -36,8 +36,8 @@ public class Audio implements AccessibleEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "author_id")
-    private Long authorId;
+    @Column(name = "owner_id")
+    private Long ownerId;
 
     @Column(name = "title")
     private String title;

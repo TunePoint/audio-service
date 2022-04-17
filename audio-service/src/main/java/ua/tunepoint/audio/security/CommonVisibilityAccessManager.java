@@ -12,7 +12,7 @@ public class CommonVisibilityAccessManager implements AccessManager<UserPrincipa
 
     @Override
     public void authorize(UserPrincipal user, AccessibleEntity entity) {
-        if (entity.isPrivate() && !Objects.equals(extractUserId(user), entity.getAuthorId())) {
+        if (entity.isPrivate() && !Objects.equals(extractUserId(user), entity.getOwnerId())) {
             throw new ForbiddenException();
         }
     }

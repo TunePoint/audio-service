@@ -17,5 +17,5 @@ public class PlaylistPayload {
     private Long audioCount;
 
     private Resource cover;
-    private User author;
+    private User owner;
 }

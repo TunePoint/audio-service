@@ -26,7 +26,7 @@ public class AudioSmartMapper {
         var cover = resourceService.getImage(audio.getCoverId())
                 .orElse(null);
 
-        var user = userService.findUser(audio.getAuthorId())
+        var user = userService.findUser(audio.getOwnerId())
                 .orElse(null);
 
         return audioMapper.toPayload(audio, content, cover, user);
@@ -34,7 +34,7 @@ public class AudioSmartMapper {
 
     public AudioPayload toPayload(Audio audio, Resource content, Resource cover) {
 
-        var user = userService.findUser(audio.getAuthorId())
+        var user = userService.findUser(audio.getOwnerId())
                 .orElse(null);
 
         return audioMapper.toPayload(audio, content, cover, user);

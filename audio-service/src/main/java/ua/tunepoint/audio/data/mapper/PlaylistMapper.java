@@ -24,11 +24,11 @@ public interface PlaylistMapper {
             @Mapping(target = "description", source = "playlist.description"),
             @Mapping(target = "isPrivate", source = "playlist.isPrivate"),
             @Mapping(target = "cover", source = "cover"),
-            @Mapping(target = "author", source = "author"),
+            @Mapping(target = "owner", source = "owner"),
             @Mapping(target = "likeCount", source = "playlist.statistics.likeCount"),
             @Mapping(target = "audioCount", source = "playlist.statistics.audioCount")
     })
-    PlaylistPayload toPayload(Playlist playlist, Resource cover, User author);
+    PlaylistPayload toPayload(Playlist playlist, Resource cover, User owner);
 
     Playlist merge(@MappingTarget Playlist playlist, PlaylistUpdateRequest request);
 

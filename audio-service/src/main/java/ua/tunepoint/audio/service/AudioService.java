@@ -70,13 +70,13 @@ public class AudioService {
     }
 
     public Page<AudioPayload> findByUser(@NotNull Long userId, @Nullable UserPrincipal currentUser, Pageable pageable) {
-        var author = userService.findUser(userId)
+        var owner = userService.findUser(userId)
                 .orElseThrow(() -> new NotFoundException("User with id " + userId + " was not found" ));
 
-        Page<Audio> page = userId.equals(extractId(currentUser)) ? audioRepository.findAudioByAuthorId(userId, pageable)
-                : audioRepository.findAudioByAuthorIdAndIsPrivateFalse(userId, pageable);
+        Page<Audio> page = userId.equals(extractId(currentUser)) ? audioRepository.findAudioByOwnerId(userId, pageable)
+                : audioRepository.findAudioByOwnerIdAndIsPrivateFalse(userId, pageable);
 
-        return page.map(it -> audioSmartMapper.toPayload(it, author));
+        return page.map(it -> audioSmartMapper.toPayload(it, owner));
     }
 
     public AudioPayload find(Long audioId, UserPrincipal user) {

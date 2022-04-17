@@ -14,11 +14,11 @@ import java.util.Optional;
 @Repository
 public interface PlaylistRepository extends PagingAndSortingRepository<Playlist, Long> {
 
-    @Query("SELECT p.id, p.authorId, p.isPrivate FROM Playlist p WHERE p.id = :id")
+    @Query("SELECT p.id, p.ownerId, p.isPrivate FROM Playlist p WHERE p.id = :id")
     Optional<AccessibleEntity> findAccessibleViewById(Long id);
 
     <T> Optional<T> findById(Long id, Class<T> projection);
 
-    @Query("SELECT p FROM Playlist p WHERE p.authorId = :authorId AND (p.isPrivate = false OR p.authorId = :userId)") // TODO: wtf
-    Page<Playlist> findByAuthorIdWithAccessControl(Long authorId, @Nullable Long userId, Pageable pageable);
+    @Query("SELECT p FROM Playlist p WHERE p.ownerId = :ownerId AND (p.isPrivate = false OR p.ownerId = :userId)") // TODO: wtf
+    Page<Playlist> findByOwnerIdWithAccessControl(Long ownerId, @Nullable Long userId, Pageable pageable);
 }

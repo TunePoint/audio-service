@@ -30,7 +30,7 @@ public class EventUtils {
 
     public static AudioLikeEvent toLikeEvent(Audio audio, Long userId) {
         return AudioLikeEvent.builder()
-                .authorId(audio.getAuthorId())
+                .ownerId(audio.getOwnerId())
                 .audioId(audio.getId())
                 .userId(userId)
                 .time(LocalDateTime.now())
@@ -39,7 +39,7 @@ public class EventUtils {
 
     public static AudioUnlikeEvent toUnlikeEvent(Audio audio, Long userId) {
         return AudioUnlikeEvent.builder()
-                .authorId(audio.getAuthorId())
+                .ownerId(audio.getOwnerId())
                 .audioId(audio.getId())
                 .userId(userId)
                 .time(LocalDateTime.now())
@@ -50,7 +50,7 @@ public class EventUtils {
         return AudioCommentCreateEvent.builder()
                 .commentId(comment.getId())
                 .audioId(audio.getId())
-                .audioAuthorId(audio.getAuthorId())
+                .audioOwnerId(audio.getOwnerId())
                 .userId(userId)
                 .time(LocalDateTime.now())
                 .build();
@@ -61,7 +61,7 @@ public class EventUtils {
                 .commentId(comment.getId())
                 .commentAuthorId(comment.getUserId())
                 .audioId(audio.getId())
-                .audioAuthorId(audio.getAuthorId())
+                .audioOwnerId(audio.getOwnerId())
                 .userId(userId)
                 .time(LocalDateTime.now())
                 .build();
@@ -72,7 +72,7 @@ public class EventUtils {
                 .commentId(comment.getId())
                 .commentAuthorId(comment.getUserId())
                 .audioId(audio.getId())
-                .audioAuthorId(audio.getAuthorId())
+                .audioOwnerId(audio.getOwnerId())
                 .userId(userId)
                 .time(LocalDateTime.now())
                 .build();
@@ -81,7 +81,7 @@ public class EventUtils {
     public static AudioCommentReplyEvent toReplyEvent(Comment comment, Comment reply, Audio audio, Long userId) {
         return AudioCommentReplyEvent.builder()
                 .audioId(audio.getId())
-                .audioAuthorId(audio.getAuthorId())
+                .audioOwnerId(audio.getOwnerId())
                 .commentId(comment.getId())
                 .commentAuthorId(comment.getUserId())
                 .replyId(reply.getId())
@@ -93,7 +93,7 @@ public class EventUtils {
     public static AudioCommentDeleteEvent toDeleteEvent(Comment comment, Audio audio, Long userId) {
         return AudioCommentDeleteEvent.builder()
                 .audioId(audio.getId())
-                .audioAuthorId(audio.getAuthorId())
+                .audioOwnerId(audio.getOwnerId())
                 .commentId(comment.getId())
                 .commentAuthorId(userId)
                 .time(LocalDateTime.now())
@@ -103,7 +103,7 @@ public class EventUtils {
     public static AudioCommentUpdateEvent toUpdateEvent(Comment comment, Audio audio, Long userId) {
         return AudioCommentUpdateEvent.builder()
                 .audioId(audio.getId())
-                .audioAuthorId(audio.getAuthorId())
+                .audioOwnerId(audio.getOwnerId())
                 .commentId(comment.getId())
                 .commentAuthorId(userId)
                 .time(LocalDateTime.now())
@@ -113,7 +113,7 @@ public class EventUtils {
     public static PlaylistCreateEvent toCreateEvent(Playlist playlist) {
         return PlaylistCreateEvent.builder()
                 .playlistId(playlist.getId())
-                .playlistAuthorId(playlist.getAuthorId())
+                .playlistOwnerId(playlist.getOwnerId())
                 .time(LocalDateTime.now())
                 .build();
     }

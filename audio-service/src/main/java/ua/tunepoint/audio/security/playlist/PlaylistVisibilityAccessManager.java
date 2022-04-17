@@ -9,7 +9,7 @@ public class PlaylistVisibilityAccessManager implements AccessManager<UserPrinci
 
     @Override
     public void authorize(UserPrincipal user, Playlist playlist) {
-        if (playlist.getIsPrivate() && !playlist.getAuthorId().equals(extractUserId(user))) {
+        if (playlist.getIsPrivate() && !playlist.getOwnerId().equals(extractUserId(user))) {
             throw new ForbiddenException();
         }
     }

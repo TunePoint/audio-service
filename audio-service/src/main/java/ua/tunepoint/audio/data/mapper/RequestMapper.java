@@ -24,7 +24,7 @@ public interface RequestMapper {
             @Mapping(target = "isPrivate", source = "request.isPrivate"),
             @Mapping(target = "contentId", source = "request.contentId"),
             @Mapping(target = "coverId", source = "request.coverId"),
-            @Mapping(target = "authorId", source = "userId")
+            @Mapping(target = "ownerId", source = "userId")
     })
     Audio toEntity(AudioPostRequest request, Long userId);
 
@@ -38,7 +38,7 @@ public interface RequestMapper {
     Comment toEntity(AudioCommentPostRequest request, Long userId);
 
     @Mappings({
-            @Mapping(target = "authorId", source = "userId"),
+            @Mapping(target = "ownerId", source = "userId"),
             @Mapping(target = "title", source = "request.title"),
             @Mapping(target = "description", source = "request.description"),
             @Mapping(target = "isPrivate", source = "request.isPrivate"),

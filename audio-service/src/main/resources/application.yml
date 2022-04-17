@@ -12,12 +12,12 @@ spring:
         default_schema: audio
     show-sql: true
   datasource:
-    url
-    username:
-    password:
+    url: jdbc:postgresql://localhost:5434/tunepoint
+    username: tunepoint
+    password: tunepoint
 
 event:
-  bootstrap-servers:
+  bootstrap-servers: localhost:9092
   service-name: ${spring.application.name:audio-service}
 
 security:

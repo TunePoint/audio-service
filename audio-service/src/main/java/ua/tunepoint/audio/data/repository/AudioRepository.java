@@ -14,11 +14,11 @@ import java.util.Set;
 @Repository
 public interface AudioRepository extends PagingAndSortingRepository<Audio, Long> {
 
-    Page<Audio> findAudioByAuthorIdAndIsPrivateFalse(Long authorId, Pageable pageable);
+    Page<Audio> findAudioByOwnerIdAndIsPrivateFalse(Long ownerId, Pageable pageable);
 
-    Page<Audio> findAudioByAuthorId(Long authorId, Pageable pageable);
+    Page<Audio> findAudioByOwnerId(Long ownerId, Pageable pageable);
 
-    @Query("SELECT a FROM Audio a JOIN PlaylistAudio pa ON pa.id.audioId = a.id WHERE pa.id.playlistId = :playlistId AND (a.isPrivate = FALSE OR a.authorId = :userId)")
+    @Query("SELECT a FROM Audio a JOIN PlaylistAudio pa ON pa.id.audioId = a.id WHERE pa.id.playlistId = :playlistId AND (a.isPrivate = FALSE OR a.ownerId = :userId)")
     Page<Audio> findAudioByPlaylistWithAccess(Long playlistId, Long userId, Pageable pageable);
 
     <T> Set<T> findAllByIdIn(Set<Long> ids, Class<T> projection);

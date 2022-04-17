@@ -9,7 +9,7 @@ public class PlaylistUpdateAccessManager implements AccessManager<UserPrincipal,
 
     @Override
     public void authorize(UserPrincipal user, Playlist playlist) {
-        if (!playlist.getAuthorId().equals(extractUserId(user))) {
+        if (!playlist.getOwnerId().equals(extractUserId(user))) {
             throw new ForbiddenException();
         }
     }

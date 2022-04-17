@@ -24,7 +24,6 @@ import ua.tunepoint.audio.model.response.domain.Resource;
 import ua.tunepoint.audio.model.response.payload.PlaylistPayload;
 import ua.tunepoint.audio.security.CommonUpdateAccessManager;
 import ua.tunepoint.audio.security.CommonVisibilityAccessManager;
-import ua.tunepoint.audio.service.support.AudioSmartMapper;
 import ua.tunepoint.audio.service.support.PlaylistSmartMapper;
 import ua.tunepoint.event.starter.publisher.EventPublisher;
 import ua.tunepoint.security.UserPrincipal;
@@ -127,8 +126,8 @@ public class PlaylistService {
         return playlistSmartMapper.toPayload(playlist);
     }
 
-    public Page<PlaylistPayload> findByAuthor(Long authorId, Pageable pageable, UserPrincipal user) {
-        return playlistRepository.findByAuthorIdWithAccessControl(authorId, user == null ? null : user.getId(), pageable)
+    public Page<PlaylistPayload> findByOwner(Long ownerId, Pageable pageable, UserPrincipal user) {
+        return playlistRepository.findByOwnerIdWithAccessControl(ownerId, user == null ? null : user.getId(), pageable)
                 .map(playlistSmartMapper::toPayload);
     }
 

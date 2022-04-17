@@ -5,7 +5,10 @@ import lombok.Getter;
 
 @AllArgsConstructor
 public enum Domain {
-    AUDIO("audio"), AUDIO_COMMENT("audio_comment"), PLAYLIST("playlist");
+
+    AUDIO("audio"),
+    AUDIO_COMMENT("audio_comment"),
+    PLAYLIST("playlist");
 
     @Getter
     private String name;

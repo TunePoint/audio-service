@@ -16,6 +16,6 @@ public class AudioUnlikeEvent implements DomainEvent {
 
     private Long userId;
     private Long audioId;
-    private Long authorId;
+    private Long ownerId;
     private LocalDateTime time;
 }

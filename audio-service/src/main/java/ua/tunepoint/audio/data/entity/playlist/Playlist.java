@@ -5,7 +5,6 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import ua.tunepoint.audio.data.entity.AccessibleEntity;
 import ua.tunepoint.audio.data.entity.Genre;
-import ua.tunepoint.audio.data.entity.audio.Audio;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -39,11 +38,18 @@ public class Playlist implements AccessibleEntity {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "author_id")
-    private Long authorId;
+    @Column(name = "owner_id")
+    private Long ownerId;
 
     @Column(name = "is_private")
     private Boolean isPrivate = false;
+
+    /**
+     * Флаг, помечающий 'сервисный' плейлист. Пользователь не может добавлять и удалять
+     * аудио из сервисного плейлиста через обычные эндпоинты.
+     */
+    @Column(name = "is_service")
+    private Boolean isService = false;
 
     @Column(name = "cover_id")
     private String coverId;

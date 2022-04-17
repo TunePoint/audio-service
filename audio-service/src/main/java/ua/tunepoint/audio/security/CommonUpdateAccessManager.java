@@ -12,7 +12,7 @@ public class CommonUpdateAccessManager implements AccessManager<UserPrincipal, A
 
     @Override
     public void authorize(UserPrincipal userIdentity, AccessibleEntity objectIdentity) {
-        if (!Objects.equals(extractUserId(userIdentity), objectIdentity.getAuthorId())) {
+        if (!Objects.equals(extractUserId(userIdentity), objectIdentity.getOwnerId())) {
             throw new ForbiddenException();
         }
     }

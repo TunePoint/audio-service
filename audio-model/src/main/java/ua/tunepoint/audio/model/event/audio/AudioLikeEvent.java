@@ -16,6 +16,6 @@ public class AudioLikeEvent implements DomainEvent {
 
     private Long userId;
     private Long audioId;
-    private Long authorId;
+    private Long ownerId;
     private LocalDateTime time;
 }

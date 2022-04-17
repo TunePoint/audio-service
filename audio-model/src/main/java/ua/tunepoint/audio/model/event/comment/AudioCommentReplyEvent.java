@@ -15,7 +15,7 @@ import java.time.LocalDateTime;
 public class AudioCommentReplyEvent implements DomainEvent {
 
     private Long audioId;
-    private Long audioAuthorId;
+    private Long audioOwnerId;
 
     private Long commentId;
     private Long commentAuthorId;

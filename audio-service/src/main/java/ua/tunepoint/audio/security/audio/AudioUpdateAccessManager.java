@@ -13,7 +13,7 @@ public class AudioUpdateAccessManager implements AccessManager<UserPrincipal, Au
 
     @Override
     public void authorize(UserPrincipal userIdentity, Audio objectIdentity) {
-        if (!Objects.equals(objectIdentity.getAuthorId(), extractId(userIdentity))) {
+        if (!Objects.equals(objectIdentity.getOwnerId(), extractId(userIdentity))) {
             throw new ForbiddenException();
         }
     }

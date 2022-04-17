@@ -3,7 +3,7 @@ package ua.tunepoint.audio.data.entity;
 public interface AccessibleEntity {
 
     Long getId();
-    Long getAuthorId();
+    Long getOwnerId();
     Boolean getIsPrivate();
 
     default boolean isPrivate() {

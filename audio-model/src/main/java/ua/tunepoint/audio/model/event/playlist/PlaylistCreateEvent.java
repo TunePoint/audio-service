@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 public class PlaylistCreateEvent implements DomainEvent {
 
     private Long playlistId;
-    private Long playlistAuthorId;
+    private Long playlistOwnerId;
+
     private LocalDateTime time;
 }

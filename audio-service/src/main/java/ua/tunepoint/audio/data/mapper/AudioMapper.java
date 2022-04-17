@@ -25,9 +25,9 @@ public interface AudioMapper {
             @Mapping(target = "listeningCount", source = "audio.statistics.listeningCount"),
             @Mapping(target = "uploadedTime", source = "audio.uploadedTime"),
             @Mapping(target = "cover", source = "cover"),
-            @Mapping(target = "author", source = "author")
+            @Mapping(target = "owner", source = "owner")
     })
-    AudioPayload toPayload(Audio audio, Resource content, Resource cover, User author);
+    AudioPayload toPayload(Audio audio, Resource content, Resource cover, User owner);
 
     @Mappings({
             @Mapping(target = "audioId", source = "audioId"),

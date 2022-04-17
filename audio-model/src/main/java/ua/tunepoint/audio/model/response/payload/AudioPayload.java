@@ -23,5 +23,5 @@ public class AudioPayload {
     private LocalDateTime uploadedTime;
     private Resource cover;
     private Resource content;
-    private User author;
+    private User owner;
 }
