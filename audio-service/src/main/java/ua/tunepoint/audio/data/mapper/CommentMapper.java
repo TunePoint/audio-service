@@ -4,10 +4,10 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Mappings;
-import ua.tunepoint.audio.data.entity.Comment;
-import ua.tunepoint.audio.data.entity.CommentLike;
-import ua.tunepoint.audio.data.entity.CommentLikeIdentity;
-import ua.tunepoint.audio.model.request.CommentUpdateRequest;
+import ua.tunepoint.audio.data.entity.comment.Comment;
+import ua.tunepoint.audio.data.entity.comment.CommentLike;
+import ua.tunepoint.audio.data.entity.comment.CommentLikeIdentity;
+import ua.tunepoint.audio.model.request.AudioCommentUpdateRequest;
 import ua.tunepoint.audio.model.response.payload.CommentPayload;
 
 @Mapper(componentModel = "spring")
@@ -23,11 +23,11 @@ public interface CommentMapper {
     @Mappings({
             @Mapping(target = "isEdited", constant = "true")
     })
-    Comment update(@MappingTarget Comment comment, CommentUpdateRequest request);
+    Comment update(@MappingTarget Comment comment, AudioCommentUpdateRequest request);
 
     @Mappings({
-            @Mapping(target = "likeIdentity.userId", source = "userId"),
-            @Mapping(target = "likeIdentity.commentId", source = "commentId")
+            @Mapping(target = "identity.userId", source = "userId"),
+            @Mapping(target = "identity.commentId", source = "commentId")
     })
     CommentLike toLike(Long commentId, Long userId);
 

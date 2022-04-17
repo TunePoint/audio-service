@@ -18,7 +18,7 @@ public class UserService {
     private final UserClient userClient;
     private final UserMapper userMapper;
 
-    public Optional<User> getUser(Long id) {
+    public Optional<User> findUser(Long id) {
         var response = userClient.getProfile(id);
         if (response == null || response.getBody() == null || response.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
             log.warn("User with id " + id + " was not found");

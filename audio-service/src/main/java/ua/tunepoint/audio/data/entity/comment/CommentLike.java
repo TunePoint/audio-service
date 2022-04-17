@@ -1,4 +1,4 @@
-package ua.tunepoint.audio.data.entity;
+package ua.tunepoint.audio.data.entity.comment;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 public class CommentLike {
 
     @EmbeddedId
-    private CommentLikeIdentity likeIdentity;
+    private CommentLikeIdentity identity;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;

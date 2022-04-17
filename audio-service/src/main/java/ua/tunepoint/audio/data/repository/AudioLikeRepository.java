@@ -1,9 +1,11 @@
 package ua.tunepoint.audio.data.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import ua.tunepoint.audio.data.entity.AudioLike;
-import ua.tunepoint.audio.data.entity.AudioLikeIdentity;
+import org.springframework.stereotype.Repository;
+import ua.tunepoint.audio.data.entity.audio.AudioLike;
+import ua.tunepoint.audio.data.entity.audio.AudioLikeIdentity;
 
+@Repository
 public interface AudioLikeRepository extends JpaRepository<AudioLike, AudioLikeIdentity> {
 
     boolean existsByLikeIdentity(AudioLikeIdentity likeIdentity);

@@ -12,9 +12,13 @@ spring:
         default_schema: audio
     show-sql: true
   datasource:
-    url:
+    url
     username:
     password:
+
+event:
+  bootstrap-servers:
+  service-name: ${spring.application.name:audio-service}
 
 security:
   secret: secret

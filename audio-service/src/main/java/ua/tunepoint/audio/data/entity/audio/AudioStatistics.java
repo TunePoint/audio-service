@@ -1,6 +1,8 @@
-package ua.tunepoint.audio.data.entity;
+package ua.tunepoint.audio.data.entity.audio;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,6 +14,7 @@ import javax.persistence.Table;
 
 @Data
 @Entity
+@EqualsAndHashCode(of = {"id"})
 @Table(name = "audio_stats")
 public class AudioStatistics {
 

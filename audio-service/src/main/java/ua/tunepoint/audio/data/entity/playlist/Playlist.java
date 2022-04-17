@@ -1,0 +1,65 @@
+package ua.tunepoint.audio.data.entity.playlist;
+
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
+import ua.tunepoint.audio.data.entity.AccessibleEntity;
+import ua.tunepoint.audio.data.entity.Genre;
+import ua.tunepoint.audio.data.entity.audio.Audio;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
+import java.util.Set;
+
+@Data
+@Entity
+@Table(name = "playlists")
+@EqualsAndHashCode(of = {"id"})
+@NoArgsConstructor
+public class Playlist implements AccessibleEntity {
+
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "title")
+    private String title;
+
+    @Column(name = "description")
+    private String description;
+
+    @Column(name = "author_id")
+    private Long authorId;
+
+    @Column(name = "is_private")
+    private Boolean isPrivate = false;
+
+    @Column(name = "cover_id")
+    private String coverId;
+
+    @OneToMany
+    @JoinColumn(name = "playlist_id")
+    private Set<PlaylistAudio> audioSet;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "playlists_genres",
+            joinColumns = @JoinColumn(name = "playlist_id"),
+            inverseJoinColumns = @JoinColumn(name = "genre_id")
+    )
+    private Set<Genre> genres;
+
+    @OneToOne(fetch = FetchType.EAGER, mappedBy = "playlist")
+    private PlaylistStatistics statistics;
+}

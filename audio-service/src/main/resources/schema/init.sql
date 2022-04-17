@@ -87,6 +87,93 @@ CREATE TABLE audio.comments_likes
     CONSTRAINT comments_likes_pk PRIMARY KEY (comment_id, user_id)
 );
 
+CREATE TABLE audio.playlists
+(
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(64),
+    description VARCHAR(256),
+    author_id BIGINT NOT NULL,
+    is_private BOOLEAN DEFAULT FALSE,
+    cover_id VARCHAR
+);
+
+CREATE TABLE audio.playlists_audio
+(
+    playlist_id INTEGER REFERENCES audio.playlists(id) ON DELETE CASCADE,
+    audio_id INTEGER REFERENCES audio.audio(id) ON DELETE CASCADE,
+    added_at TIMESTAMP
+);
+
+CREATE TABLE audio.playlists_likes
+(
+    playlist_id INTEGER REFERENCES audio.playlists(id) ON DELETE CASCADE ,
+    user_id INTEGER NOT NULL,
+    created_at TIMESTAMP,
+
+    CONSTRAINT playlist_likes_ok PRIMARY KEY (playlist_id, user_id)
+);
+
+CREATE TABLE audio.playlists_stats
+(
+    id INTEGER PRIMARY KEY REFERENCES audio.playlists(id) ON DELETE CASCADE,
+    like_count BIGINT DEFAULT 0,
+    audio_count BIGINT DEFAULT 0
+);
+
+CREATE TABLE audio.playlists_genres
+(
+    playlist_id INTEGER REFERENCES audio.playlists(id) ON DELETE CASCADE,
+    genre_id INTEGER REFERENCES audio.genres(id)
+);
+
+--- PLAYLIST TRIGGERS
+
+CREATE FUNCTION create_playlist_stats() RETURNS trigger AS $$
+BEGIN
+INSERT INTO audio.playlists_stats(id) values (new.id);
+RETURN new;
+END $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER playlist_created AFTER INSERT ON audio.playlists
+    FOR EACH ROW EXECUTE procedure create_playlist_stats();
+
+CREATE FUNCTION update_playlist_stats_like() RETURNS trigger AS $$
+BEGIN
+UPDATE audio.playlists_stats SET like_count = like_count + 1 WHERE id = new.playlist_id;
+RETURN new;
+END $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER playlist_liked AFTER INSERT ON audio.playlists_likes
+    FOR EACH ROW EXECUTE PROCEDURE update_playlist_stats_like();
+
+CREATE FUNCTION update_playlist_stats_unlike() RETURNS trigger AS $$
+BEGIN
+UPDATE audio.playlists_stats SET like_count = like_count - 1 WHERE id = old.playlist_id;
+RETURN old;
+END $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER playlist_unliked AFTER DELETE ON audio.playlists_likes
+    FOR EACH ROW EXECUTE PROCEDURE update_playlist_stats_unlike();
+
+CREATE FUNCTION update_playlist_stats_audio_add() RETURNS trigger AS $$
+BEGIN
+    UPDATE audio.playlists_stats SET audio_count = playlists_stats.audio_count + 1 WHERE id = new.playlist_id;
+    RETURN new;
+END $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER playlist_audio_added AFTER INSERT ON audio.playlists_audio
+    FOR EACH ROW EXECUTE PROCEDURE update_playlist_stats_audio_add();
+
+CREATE FUNCTION update_playlist_stats_audio_remove() RETURNS trigger AS $$
+BEGIN
+    UPDATE audio.playlists_stats SET audio_count = playlists_stats.audio_count - 1 WHERE id = new.playlist_id;
+    RETURN new;
+END $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER playlist_audio_removed AFTER DELETE ON audio.playlists_audio
+    FOR EACH ROW EXECUTE PROCEDURE update_playlist_stats_audio_remove();
+
+--- AUDIO TRIGGERS
 
 CREATE FUNCTION create_audio_stats() RETURNS trigger AS $$
 BEGIN
@@ -96,6 +183,35 @@ END $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER audio_created AFTER INSERT ON audio.audio
     FOR EACH ROW EXECUTE procedure create_audio_stats();
+
+CREATE FUNCTION update_audio_stats_like() RETURNS trigger AS $$
+BEGIN
+    UPDATE audio.audio_stats SET like_count = like_count + 1 WHERE id = new.audio_id;
+    RETURN new;
+END $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER audio_liked AFTER INSERT ON audio.audio_likes
+    FOR EACH ROW EXECUTE procedure update_audio_stats_like();
+
+CREATE FUNCTION update_audio_stats_unlike() RETURNS trigger AS $$
+BEGIN
+    UPDATE audio.audio_stats SET like_count = like_count - 1 WHERE id = old.audio_id;
+    RETURN new;
+END $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER audio_unliked AFTER DELETE ON audio.audio_likes
+    FOR EACH ROW EXECUTE procedure update_audio_stats_unlike();
+
+CREATE FUNCTION update_audio_stats_listening() RETURNS trigger AS $$
+BEGIN
+    UPDATE audio.audio_stats SET listening_count = audio_stats.listening_count + 1 WHERE id = new.audio_id;
+    RETURN new;
+END $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER audio_listened AFTER INSERT ON audio.audio_listening
+    FOR EACH ROW EXECUTE procedure update_audio_stats_listening();
+
+--- AUDIO COMMENT TRIGGERS
 
 CREATE FUNCTION create_comment_stats() RETURNS trigger AS $$
 BEGIN
@@ -152,32 +268,3 @@ END $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER comment_delete AFTER DELETE ON audio.comments
     FOR EACH ROW EXECUTE procedure update_audio_stats_comment_delete();
-
-CREATE FUNCTION update_audio_stats_like() RETURNS trigger AS $$
-BEGIN
-    UPDATE audio.audio_stats SET like_count = like_count + 1 WHERE id = new.audio_id;
-    RETURN new;
-END $$ LANGUAGE plpgsql;
-
-CREATE TRIGGER audio_liked AFTER INSERT ON audio.audio_likes
-    FOR EACH ROW EXECUTE procedure update_audio_stats_like();
-
-CREATE FUNCTION update_audio_stats_unlike() RETURNS trigger AS $$
-BEGIN
-    UPDATE audio.audio_stats SET like_count = like_count - 1 WHERE id = old.audio_id;
-    RETURN new;
-END $$ LANGUAGE plpgsql;
-
-CREATE TRIGGER audio_unliked AFTER DELETE ON audio.audio_likes
-    FOR EACH ROW EXECUTE procedure update_audio_stats_unlike();
-
-CREATE FUNCTION update_audio_stats_listening() RETURNS trigger AS $$
-BEGIN
-    UPDATE audio.audio_stats SET listening_count = audio_stats.listening_count + 1 WHERE id = new.audio_id;
-    RETURN new;
-END $$ LANGUAGE plpgsql;
-
-CREATE TRIGGER audio_listened AFTER INSERT ON audio.audio_listening
-    FOR EACH ROW EXECUTE procedure update_audio_stats_listening();
-
-

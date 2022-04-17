@@ -1,6 +1,7 @@
 package ua.tunepoint.audio.api;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
@@ -21,8 +22,10 @@ import ua.tunepoint.audio.model.response.AudioListGetResponse;
 import ua.tunepoint.audio.model.response.AudioGetResponse;
 import ua.tunepoint.audio.model.response.AudioPostResponse;
 import ua.tunepoint.audio.model.response.AudioUpdateResponse;
+import ua.tunepoint.audio.model.response.payload.AudioPayload;
 import ua.tunepoint.audio.service.AudioService;
 import ua.tunepoint.security.UserPrincipal;
+import ua.tunepoint.web.exception.BadRequestException;
 import ua.tunepoint.web.model.StatusResponse;
 
 @RestController
@@ -40,9 +43,19 @@ public class AudioController {
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping(params = {"userId"})
-    public ResponseEntity<AudioListGetResponse> getUserAudio(@RequestParam("userId") Long userId, @PageableDefault(sort = "uploadedTime", direction = Sort.Direction.DESC) Pageable pageable, @AuthenticationPrincipal UserPrincipal user) {
-        var payload = audioService.findUserAudio(userId, user, pageable);
+    @GetMapping(params = {"searchBy", "id"})
+    public ResponseEntity<AudioListGetResponse> getUserAudio(
+            @RequestParam("searchBy") String searchBy,
+            @RequestParam("id") Long id,
+            @PageableDefault(sort = "uploadedTime", direction = Sort.Direction.DESC) Pageable pageable,
+            @AuthenticationPrincipal UserPrincipal user) {
+
+        Page<AudioPayload> payload = switch (searchBy) {
+            case "user" -> audioService.findByUser(id, user, pageable);
+            case "playlist" -> audioService.findByPlaylist(id, user, pageable);
+            default -> throw new BadRequestException("Unknown value of parameter 'searchBy'");
+        };
+
         var response = AudioListGetResponse.builder().payload(payload).build();
 
         return ResponseEntity.ok(response);

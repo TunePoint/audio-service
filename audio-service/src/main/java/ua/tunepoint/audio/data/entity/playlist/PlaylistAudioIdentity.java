@@ -1,6 +1,6 @@
-package ua.tunepoint.audio.data.entity;
+package ua.tunepoint.audio.data.entity.playlist;
 
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,13 +9,14 @@ import javax.persistence.Embeddable;
 import java.io.Serializable;
 
 @Data
-@Embeddable
+@AllArgsConstructor
 @NoArgsConstructor
-public class AudioLikeIdentity implements Serializable {
+@Embeddable
+public class PlaylistAudioIdentity implements Serializable {
+
+    @Column(name = "playlist_id")
+    private Long playlistId;
 
     @Column(name = "audio_id")
     private Long audioId;
-
-    @Column(name = "user_id")
-    private Long userId;
 }

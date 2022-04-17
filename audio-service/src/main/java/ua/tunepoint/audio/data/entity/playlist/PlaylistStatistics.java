@@ -1,6 +1,8 @@
-package ua.tunepoint.audio.data.entity;
+package ua.tunepoint.audio.data.entity.playlist;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,20 +14,21 @@ import javax.persistence.Table;
 
 @Entity
 @Data
-@Table(name = "comments_stats")
-public class CommentStatistics {
+@NoArgsConstructor
+@EqualsAndHashCode(of = {"id"})
+@Table(name = "playlists_stats")
+public class PlaylistStatistics {
 
     @Id
-    @Column(name = "id")
     private Long id;
 
     @Column(name = "like_count")
     private Long likeCount;
 
-    @Column(name = "reply_count")
-    private Long replyCount;
+    @Column(name = "audio_count")
+    private Long audioCount;
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "id")
-    private Comment comment;
+    private Playlist playlist;
 }

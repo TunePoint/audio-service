@@ -2,7 +2,7 @@ package ua.tunepoint.audio.service.support;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
-import ua.tunepoint.audio.data.entity.Comment;
+import ua.tunepoint.audio.data.entity.comment.Comment;
 import ua.tunepoint.audio.data.mapper.CommentMapper;
 import ua.tunepoint.audio.model.response.domain.User;
 import ua.tunepoint.audio.model.response.payload.CommentPayload;
@@ -33,7 +33,7 @@ public class CommentSmartMapper {
         if (userCache.containsKey(userId)) {
             mappedComment.setUser(userCache.get(userId));
         } else {
-            var user = userService.getUser(mappedComment.getUserId()).orElse(null);
+            var user = userService.findUser(mappedComment.getUserId()).orElse(null);
             userCache.put(userId, user);
             mappedComment.setUser(user);
         }

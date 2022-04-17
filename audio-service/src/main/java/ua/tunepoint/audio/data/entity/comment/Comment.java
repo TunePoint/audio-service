@@ -1,7 +1,8 @@
-package ua.tunepoint.audio.data.entity;
+package ua.tunepoint.audio.data.entity.comment;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import ua.tunepoint.audio.data.entity.audio.Audio;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -17,7 +18,6 @@ import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
-import java.util.Collection;
 import java.util.Set;
 
 @Data
@@ -66,5 +66,10 @@ public class Comment {
     @PrePersist
     public void onCreate() {
         createdAt = LocalDateTime.now();
+    }
+
+    public void reply(Comment comment) {
+        replyTo = comment;
+        audio = comment.getAudio();
     }
 }

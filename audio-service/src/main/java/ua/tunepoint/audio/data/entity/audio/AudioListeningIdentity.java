@@ -1,4 +1,4 @@
-package ua.tunepoint.audio.data.entity;
+package ua.tunepoint.audio.data.entity.audio;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

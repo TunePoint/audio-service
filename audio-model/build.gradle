@@ -6,6 +6,7 @@ dependencies {
     implementation 'org.hibernate.validator:hibernate-validator'
     implementation 'org.springframework.data:spring-data-commons'
     implementation 'ua.tunepoint:commons-web-model'
+    implementation 'ua.tunepoint:commons-event-model'
 
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'

@@ -12,11 +12,14 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.kafka:spring-kafka'
 
     implementation 'org.liquibase:liquibase-core'
     implementation 'org.mapstruct:mapstruct'
     implementation 'com.auth0:java-jwt'
 
+    implementation 'ua.tunepoint:commons-event-model'
+    implementation 'ua.tunepoint:commons-event-starter'
     implementation 'ua.tunepoint:commons-security'
     implementation 'ua.tunepoint:resource-api'
     implementation 'ua.tunepoint:resource-model'

@@ -1,8 +1,9 @@
-package ua.tunepoint.audio.data.entity;
+package ua.tunepoint.audio.data.entity.audio;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.persistence.Column;
 import javax.persistence.EmbeddedId;
 import javax.persistence.Entity;
 import javax.persistence.PrePersist;
@@ -18,6 +19,7 @@ public class AudioLike {
     @EmbeddedId
     private AudioLikeIdentity likeIdentity;
 
+    @Column(name = "created_at")
     private LocalDateTime createdAt;
 
     @PrePersist

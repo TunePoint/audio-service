@@ -1,8 +1,12 @@
-package ua.tunepoint.audio.data.entity;
+package ua.tunepoint.audio.data.entity.audio;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
+import ua.tunepoint.audio.data.entity.AccessibleEntity;
+import ua.tunepoint.audio.data.entity.Genre;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,14 +21,15 @@ import javax.persistence.OneToOne;
 import javax.persistence.PrePersist;
 import javax.persistence.Table;
 import java.time.LocalDateTime;
-import java.util.Collection;
+import java.util.Set;
 
 @Data
 @Entity
 @Table(name = "audio")
 @NoArgsConstructor
 @AllArgsConstructor
-public class Audio {
+@EqualsAndHashCode(of = {"id"})
+public class Audio implements AccessibleEntity {
 
     @Id
     @Column(name = "id")
@@ -64,7 +69,7 @@ public class Audio {
             joinColumns = @JoinColumn(name = "audio_id"),
             inverseJoinColumns = @JoinColumn(name = "genre_id")
     )
-    private Collection<Genre> genres;
+    private Set<Genre> genres;
 
     @OneToOne(mappedBy = "audio", fetch = FetchType.EAGER)
     private AudioStatistics statistics;

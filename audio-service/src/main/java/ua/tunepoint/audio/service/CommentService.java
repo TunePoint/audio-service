@@ -5,26 +5,37 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import ua.tunepoint.audio.data.entity.Audio;
-import ua.tunepoint.audio.data.entity.Comment;
+import org.springframework.transaction.annotation.Transactional;
+import ua.tunepoint.audio.data.entity.audio.Audio;
+import ua.tunepoint.audio.data.entity.comment.Comment;
 import ua.tunepoint.audio.data.mapper.CommentMapper;
 import ua.tunepoint.audio.data.mapper.RequestMapper;
 import ua.tunepoint.audio.data.repository.AudioRepository;
 import ua.tunepoint.audio.data.repository.CommentLikeRepository;
 import ua.tunepoint.audio.data.repository.CommentRepository;
-import ua.tunepoint.audio.model.request.AudioCommentRequest;
-import ua.tunepoint.audio.model.request.CommentUpdateRequest;
+import ua.tunepoint.audio.model.request.AudioCommentPostRequest;
+import ua.tunepoint.audio.model.request.AudioCommentUpdateRequest;
 import ua.tunepoint.audio.model.response.payload.CommentPayload;
 import ua.tunepoint.audio.security.audio.AudioVisibilityAccessManager;
 import ua.tunepoint.audio.security.comment.CommentDeleteAccessManager;
 import ua.tunepoint.audio.security.comment.CommentUpdateAccessManager;
 import ua.tunepoint.audio.service.support.CommentSmartMapper;
+import ua.tunepoint.event.starter.publisher.EventPublisher;
 import ua.tunepoint.security.UserPrincipal;
 import ua.tunepoint.web.exception.BadRequestException;
 import ua.tunepoint.web.exception.NotFoundException;
 
 import javax.annotation.Nullable;
-import javax.transaction.Transactional;
+
+import java.util.Collections;
+
+import static ua.tunepoint.audio.model.event.Domain.AUDIO_COMMENT;
+import static ua.tunepoint.audio.utils.EventUtils.toCreateEvent;
+import static ua.tunepoint.audio.utils.EventUtils.toDeleteEvent;
+import static ua.tunepoint.audio.utils.EventUtils.toLikeEvent;
+import static ua.tunepoint.audio.utils.EventUtils.toReplyEvent;
+import static ua.tunepoint.audio.utils.EventUtils.toUnlikeEvent;
+import static ua.tunepoint.audio.utils.EventUtils.toUpdateEvent;
 
 @Service
 @RequiredArgsConstructor
@@ -42,23 +53,28 @@ public class CommentService {
     private final CommentDeleteAccessManager commentDeleteAccessManager;
     private final CommentUpdateAccessManager commentUpdateAccessManager;
 
+    private final EventPublisher publisher;
+
     @Transactional
-    public CommentPayload save(Long audioId, AudioCommentRequest request, UserPrincipal user) {
+    public CommentPayload save(Long audioId, AudioCommentPostRequest request, UserPrincipal user) {
 
         var audio = findAudioElseThrow(audioId);
 
         audioVisibilityAccessManager.authorize(user, audio);
 
         var comment = requestMapper.toEntity(request, user.getId());
-
         comment.setAudio(audio);
 
         var savedComment = commentRepository.save(comment);
+        var payload = commentSmartMapper.toPayload(savedComment);
 
-        return commentSmartMapper.toPayload(savedComment);
+        publisher.publish(AUDIO_COMMENT.getName(),
+                Collections.singletonList(toCreateEvent(comment, audio, user.getId()))
+        );
+
+        return payload;
     }
 
-    @Transactional
     public Page<CommentPayload> find(Long audioId, Pageable pageable, @Nullable UserPrincipal user) {
 
         var audio = findAudioElseThrow(audioId);
@@ -78,7 +94,7 @@ public class CommentService {
     }
 
     @Transactional
-    public CommentPayload update(Long commentId, CommentUpdateRequest request, UserPrincipal user) {
+    public CommentPayload update(Long commentId, AudioCommentUpdateRequest request, UserPrincipal user) {
 
         var comment = findCommentElseThrow(commentId);
 
@@ -87,7 +103,13 @@ public class CommentService {
         comment = commentMapper.update(comment, request);
         var updatedComment = commentRepository.save(comment);
 
-        return commentSmartMapper.toPayload(updatedComment);
+        var payload = commentSmartMapper.toPayload(updatedComment);
+
+        publisher.publish(AUDIO_COMMENT.getName(),
+                Collections.singletonList(toUpdateEvent(updatedComment, comment.getAudio(), user.getId()))
+        );
+
+        return payload;
     }
 
     @Transactional
@@ -102,7 +124,13 @@ public class CommentService {
 
         var deletedComment = commentRepository.save(comment);
 
-        return commentSmartMapper.toPayload(deletedComment);
+        var payload = commentSmartMapper.toPayload(deletedComment);
+
+        publisher.publish(AUDIO_COMMENT.getName(),
+                Collections.singletonList(toDeleteEvent(deletedComment, comment.getAudio(), user.getId()))
+        );
+
+        return payload;
     }
 
     @Transactional
@@ -112,10 +140,14 @@ public class CommentService {
         audioVisibilityAccessManager.authorize(user, comment.getAudio());
 
         var like = commentMapper.toLike(commentId, user.getId());
-        if (likeRepository.existsByLikeIdentity(like.getLikeIdentity())) {
+        if (likeRepository.existsByIdentity(like.getIdentity())) {
             throw new BadRequestException("You already liked this comment");
         }
         likeRepository.save(like);
+
+        publisher.publish(AUDIO_COMMENT.getName(),
+                Collections.singletonList(toLikeEvent(comment, comment.getAudio(), user.getId()))
+        );
     }
 
     @Transactional
@@ -125,26 +157,35 @@ public class CommentService {
         audioVisibilityAccessManager.authorize(user, comment.getAudio());
 
         var like = commentMapper.toLike(commentId, user.getId());
-        if (!likeRepository.existsByLikeIdentity(like.getLikeIdentity())) {
+        if (!likeRepository.existsByIdentity(like.getIdentity())) {
             throw new BadRequestException("Like is not set");
         }
         likeRepository.delete(like);
+
+        publisher.publish(AUDIO_COMMENT.getName(),
+                Collections.singletonList(toUnlikeEvent(comment, comment.getAudio(), user.getId()))
+        );
     }
 
     @Transactional
-    public CommentPayload reply(Long commentId, AudioCommentRequest request, UserPrincipal user) {
+    public CommentPayload reply(Long commentId, AudioCommentPostRequest request, UserPrincipal user) {
         var comment = findCommentElseThrow(commentId);
 
         audioVisibilityAccessManager.authorize(user, comment.getAudio());
 
-        var reply = requestMapper.toEntity(request, user.getId());
+        var replyComment = requestMapper.toEntity(request, user.getId());
 
-        reply.setAudio(comment.getAudio());
-        reply.setReplyTo(comment);
+        replyComment.reply(comment);
 
-        commentRepository.save(reply);
+        commentRepository.save(replyComment);
 
-        return commentSmartMapper.toPayload(reply);
+        var payload = commentSmartMapper.toPayload(replyComment);
+
+        publisher.publish(AUDIO_COMMENT.getName(),
+                Collections.singletonList(toReplyEvent(comment, replyComment, comment.getAudio(), user.getId()))
+        );
+
+        return payload;
     }
 
     private Comment findCommentElseThrow(Long commentId) {

@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ua.tunepoint.audio.model.request.AudioCommentRequest;
-import ua.tunepoint.audio.model.request.CommentUpdateRequest;
+import ua.tunepoint.audio.model.request.AudioCommentPostRequest;
+import ua.tunepoint.audio.model.request.AudioCommentUpdateRequest;
 import ua.tunepoint.audio.model.response.CommentDeleteResponse;
 import ua.tunepoint.audio.model.response.CommentGetResponse;
 import ua.tunepoint.audio.model.response.CommentsGetResponse;
@@ -36,7 +36,7 @@ public class CommentController {
 
     @PostMapping(params = {"audioId"})
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<CommentPostResponse> postComment(@RequestParam Long audioId, @RequestBody AudioCommentRequest request, @AuthenticationPrincipal UserPrincipal user) {
+    public ResponseEntity<CommentPostResponse> postComment(@RequestParam Long audioId, @RequestBody AudioCommentPostRequest request, @AuthenticationPrincipal UserPrincipal user) {
         var payload = commentService.save(audioId, request, user);
         var response = CommentPostResponse.builder().payload(payload).build();
         return ResponseEntity.ok(response);
@@ -58,7 +58,7 @@ public class CommentController {
 
     @PutMapping(path = "/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<CommentUpdateResponse> updateComment(@PathVariable Long id, @RequestBody CommentUpdateRequest request, @AuthenticationPrincipal UserPrincipal user) {
+    public ResponseEntity<CommentUpdateResponse> updateComment(@PathVariable Long id, @RequestBody AudioCommentUpdateRequest request, @AuthenticationPrincipal UserPrincipal user) {
         var payload = commentService.update(id, request, user);
         var response = CommentUpdateResponse.builder().payload(payload).build();
         return ResponseEntity.ok(response);
@@ -88,7 +88,7 @@ public class CommentController {
 
     @PostMapping("/{id}/replies")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<CommentPostResponse> replyComment(@PathVariable Long id, @RequestBody AudioCommentRequest request, @AuthenticationPrincipal UserPrincipal user) {
+    public ResponseEntity<CommentPostResponse> replyComment(@PathVariable Long id, @RequestBody AudioCommentPostRequest request, @AuthenticationPrincipal UserPrincipal user) {
         var payload = commentService.reply(id, request, user);
         var response = CommentPostResponse.builder().payload(payload).build();
         return ResponseEntity.ok(response);
