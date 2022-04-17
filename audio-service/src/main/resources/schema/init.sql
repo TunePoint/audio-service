@@ -94,6 +94,7 @@ CREATE TABLE audio.playlists
     description VARCHAR(256),
     owner_id BIGINT NOT NULL,
     is_private BOOLEAN DEFAULT FALSE,
+    is_service BOOLEAN DEFAULT FALSE,
     cover_id VARCHAR
 );
 

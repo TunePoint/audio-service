@@ -45,8 +45,8 @@ public class Playlist implements AccessibleEntity {
     private Boolean isPrivate = false;
 
     /**
-     * Флаг, помечающий 'сервисный' плейлист. Пользователь не может добавлять и удалять
-     * аудио из сервисного плейлиста через обычные эндпоинты.
+     * Flag indicating that playlist is created by service. User shouldn't be able to
+     * delete nor update such playlist through endpoints
      */
     @Column(name = "is_service")
     private Boolean isService = false;
