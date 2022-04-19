@@ -7,20 +7,12 @@ import ua.tunepoint.security.UserPrincipal;
 import ua.tunepoint.web.exception.ForbiddenException;
 
 @Component
-public class PlaylistUpdateAccessManager implements AccessManager<UserPrincipal, PlaylistAccessibleEntity> {
+public class PlaylistInteractionAccessManager implements AccessManager<UserPrincipal, PlaylistAccessibleEntity> {
 
     @Override
     public void authorize(UserPrincipal user, PlaylistAccessibleEntity playlist) {
         if (playlist.isService()) {
-            throw new ForbiddenException("You can't update service playlist");
+            throw new ForbiddenException("You can't interact like that with service playlist");
         }
-
-        if (!playlist.getOwnerId().equals(extractUserId(user))) {
-            throw new ForbiddenException("You can't update playlist you don't own");
-        }
-    }
-
-    private Long extractUserId(UserPrincipal user) {
-        return user == null ? null : user.getId();
     }
 }

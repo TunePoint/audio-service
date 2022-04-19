@@ -7,6 +7,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.tunepoint.audio.data.entity.AccessibleEntity;
+import ua.tunepoint.audio.data.entity.PlaylistAccessibleEntity;
 import ua.tunepoint.audio.data.entity.audio.Audio;
 import ua.tunepoint.audio.data.entity.playlist.Playlist;
 import ua.tunepoint.audio.data.entity.playlist.PlaylistAudio;
@@ -24,6 +25,8 @@ import ua.tunepoint.audio.model.response.domain.Resource;
 import ua.tunepoint.audio.model.response.payload.PlaylistPayload;
 import ua.tunepoint.audio.security.CommonUpdateAccessManager;
 import ua.tunepoint.audio.security.CommonVisibilityAccessManager;
+import ua.tunepoint.audio.security.playlist.PlaylistInteractionAccessManager;
+import ua.tunepoint.audio.security.playlist.PlaylistUpdateAccessManager;
 import ua.tunepoint.audio.service.support.PlaylistSmartMapper;
 import ua.tunepoint.event.starter.publisher.EventPublisher;
 import ua.tunepoint.security.UserPrincipal;
@@ -55,8 +58,9 @@ public class PlaylistService {
 
     private final EventPublisher eventPublisher;
 
+    private final PlaylistInteractionAccessManager playlistInteractionAccessManager;
+    private final PlaylistUpdateAccessManager playlistUpdateAccessManager;
     private final CommonVisibilityAccessManager commonVisibilityAccessManager;
-    private final CommonUpdateAccessManager commonUpdateAccessManager;
 
     @Transactional
     public PlaylistPayload create(PlaylistPostRequest request, UserPrincipal user) {
@@ -102,7 +106,7 @@ public class PlaylistService {
     public PlaylistPayload update(Long playlistId, PlaylistUpdateRequest request, UserPrincipal user) {
         Playlist playlist = findPlaylistRequired(playlistId);
 
-        commonUpdateAccessManager.authorize(user, playlist);
+        playlistUpdateAccessManager.authorize(user, playlist);
 
         Resource cover = null;
         if (request.getCoverId() != null) {
@@ -133,9 +137,10 @@ public class PlaylistService {
 
     @Transactional
     public void like(Long playlistId, UserPrincipal user) {
-         var playlistAccessible = playlistRepository.findById(playlistId, AccessibleEntity.class)
+         var playlistAccessible = playlistRepository.findById(playlistId, PlaylistAccessibleEntity.class)
                  .orElseThrow(NotFoundException::new);
 
+         playlistInteractionAccessManager.authorize(user, playlistAccessible);
          commonVisibilityAccessManager.authorize(user, playlistAccessible);
 
          var likeIdentity = new PlaylistLikeIdentity(playlistId, user.getId());
@@ -149,9 +154,10 @@ public class PlaylistService {
 
     @Transactional
     public void unlike(Long playlistId, UserPrincipal user) {
-        var playlistAccessible = playlistRepository.findById(playlistId, AccessibleEntity.class)
+        var playlistAccessible = playlistRepository.findById(playlistId, PlaylistAccessibleEntity.class)
                 .orElseThrow(NotFoundException::new);
 
+        playlistInteractionAccessManager.authorize(user, playlistAccessible);
         commonVisibilityAccessManager.authorize(user, playlistAccessible);
 
         var likeIdentity = new PlaylistLikeIdentity(playlistId, user.getId());
@@ -164,10 +170,10 @@ public class PlaylistService {
 
     @Transactional
     public void delete(Long playlistId, UserPrincipal user) {
-        var playlistAccessible = playlistRepository.findById(playlistId, AccessibleEntity.class)
+        var playlistAccessible = playlistRepository.findById(playlistId, PlaylistAccessibleEntity.class)
                 .orElseThrow(NotFoundException::new);
 
-        commonUpdateAccessManager.authorize(user, playlistAccessible);
+        playlistUpdateAccessManager.authorize(user, playlistAccessible);
 
         playlistRepository.deleteById(playlistId); // TODO: publish event
     }
@@ -199,9 +205,9 @@ public class PlaylistService {
     }
 
     private void authorizePlaylistUpdate(Long playlistId, Long audioId, UserPrincipal user) {
-        var playlistAccessible = playlistRepository.findById(playlistId, AccessibleEntity.class)
+        var playlistAccessible = playlistRepository.findById(playlistId, PlaylistAccessibleEntity.class)
                 .orElseThrow(NotFoundException::new);
-        commonUpdateAccessManager.authorize(user, playlistAccessible);
+        playlistUpdateAccessManager.authorize(user, playlistAccessible);
 
         var audioAccessible = audioRepository.findById(audioId, AccessibleEntity.class)
                 .orElseThrow(NotFoundException::new);

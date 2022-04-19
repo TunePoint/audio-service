@@ -61,12 +61,12 @@ subprojects {
             dependency 'ua.tunepoint:commons-security:0.0.2'
             dependency 'ua.tunepoint:resource-api:0.0.4'
             dependency 'ua.tunepoint:resource-model:0.0.4'
-            dependency 'ua.tunepoint:account-api:0.0.3'
-            dependency 'ua.tunepoint:account-model:0.0.3'
+            dependency 'ua.tunepoint:account-api:0.0.4'
+            dependency 'ua.tunepoint:account-model:0.0.4'
             dependency 'ua.tunepoint:commons-web-model:0.0.3'
             dependency 'ua.tunepoint:commons-web-exception:0.0.3'
-            dependency 'ua.tunepoint:commons-event-model:0.0.9'
-            dependency 'ua.tunepoint:commons-event-starter:0.0.9'
+            dependency 'ua.tunepoint:commons-event-model:0.0.10'
+            dependency 'ua.tunepoint:commons-event-starter:0.0.10'
 
             dependency 'com.auth0:java-jwt:3.19.0'
         }

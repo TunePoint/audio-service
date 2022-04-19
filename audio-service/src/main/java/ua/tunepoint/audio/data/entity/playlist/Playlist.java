@@ -5,6 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import ua.tunepoint.audio.data.entity.AccessibleEntity;
 import ua.tunepoint.audio.data.entity.Genre;
+import ua.tunepoint.audio.data.entity.PlaylistAccessibleEntity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -25,7 +26,7 @@ import java.util.Set;
 @Table(name = "playlists")
 @EqualsAndHashCode(of = {"id"})
 @NoArgsConstructor
-public class Playlist implements AccessibleEntity {
+public class Playlist implements PlaylistAccessibleEntity {
 
     @Id
     @Column(name = "id")
