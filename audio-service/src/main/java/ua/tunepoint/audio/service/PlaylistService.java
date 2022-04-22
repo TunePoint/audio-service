@@ -91,6 +91,7 @@ public class PlaylistService {
         Set<PlaylistAudio> playlistAudioSet = authorizedAudioSet.stream()
                 .map(it -> playlistMapper.toPlaylistAudio(savedPlaylist.getId(), it.getId()))
                 .collect(Collectors.toSet());
+
         playlistAudioRepository.saveAll(playlistAudioSet);
 
         var payload = playlistSmartMapper.toPayload(savedPlaylist, cover);

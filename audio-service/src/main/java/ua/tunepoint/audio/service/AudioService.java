@@ -52,6 +52,14 @@ public class AudioService {
 
     private final EventPublisher publisher;
 
+    // 1. resource-service call for audio
+    // 2. resource-service call for image
+    // 3. request-model mapping
+    // 4. save to db
+    // 5. account-service call
+    // 6. model-payload mapping
+    // 7. publishing audio.created event
+    // the method does a lot of work. should think about how it can be split
     @Transactional
     public AudioPayload save(AudioPostRequest request, @NotNull UserPrincipal user) {
 

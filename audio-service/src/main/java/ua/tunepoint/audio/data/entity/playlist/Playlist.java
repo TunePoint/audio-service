@@ -3,11 +3,12 @@ package ua.tunepoint.audio.data.entity.playlist;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import ua.tunepoint.audio.data.entity.AccessibleEntity;
 import ua.tunepoint.audio.data.entity.Genre;
 import ua.tunepoint.audio.data.entity.PlaylistAccessibleEntity;
+import ua.tunepoint.audio.data.entity.playlist.converter.ManagerTypeConverter;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -45,12 +46,9 @@ public class Playlist implements PlaylistAccessibleEntity {
     @Column(name = "is_private")
     private Boolean isPrivate = false;
 
-    /**
-     * Flag indicating that playlist is created by service. User shouldn't be able to
-     * delete nor update such playlist through endpoints
-     */
-    @Column(name = "is_service")
-    private Boolean isService = false;
+    @Column(name = "manager_type")
+    @Convert(converter = ManagerTypeConverter.class)
+    private ManagerType managerType;
 
     @Column(name = "cover_id")
     private String coverId;

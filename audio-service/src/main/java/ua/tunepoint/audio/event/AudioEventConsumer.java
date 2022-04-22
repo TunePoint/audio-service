@@ -14,8 +14,8 @@ import ua.tunepoint.model.event.user.UserCreatedEvent;
 import static ua.tunepoint.audio.model.event.Domain.AUDIO;
 import static ua.tunepoint.model.event.AccountDomain.USER;
 
-@Component
 @Slf4j
+@Component
 @RequiredArgsConstructor
 public class AudioEventConsumer {
 
@@ -34,13 +34,18 @@ public class AudioEventConsumer {
 
     private void handleAudioLike(AudioLikeEvent event) {
         log.info("Handling audio.like event: " + event);
+        // playlistService.findByManagerType(ManagerType.SERVICE_LIKES, event.getUserId())
+        //                      .forEach(it -> playlistService.addToPlaylist(it, event.getAudioId()));
     }
 
     private void handleAudioUnlike(AudioUnlikeEvent event) {
         log.info("Handling audio.unlike event: " + event);
+        // playlistService.findByManagerType(ManagerType.SERVICE_LIKES, event.getUserId())
+        //                      .forEach(it -> playlistService.removeFromPlaylist(it, event.getAudioId()));
     }
 
     private void handleUserCreated(UserCreatedEvent event) {
         log.info("Handling user.create event: " + event);
+        // playlistService.createPlaylist(name, ManagerType.SERVICE_LIKES, event.getUserId())
     }
 }

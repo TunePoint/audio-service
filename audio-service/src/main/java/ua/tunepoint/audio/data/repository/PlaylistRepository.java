@@ -6,10 +6,12 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
 import ua.tunepoint.audio.data.entity.AccessibleEntity;
+import ua.tunepoint.audio.data.entity.playlist.ManagerType;
 import ua.tunepoint.audio.data.entity.playlist.Playlist;
 
 import javax.annotation.Nullable;
 import java.util.Optional;
+import java.util.Set;
 
 @Repository
 public interface PlaylistRepository extends PagingAndSortingRepository<Playlist, Long> {
@@ -19,6 +21,8 @@ public interface PlaylistRepository extends PagingAndSortingRepository<Playlist,
 
     <T> Optional<T> findById(Long id, Class<T> projection);
 
-    @Query("SELECT p FROM Playlist p WHERE p.ownerId = :ownerId AND (p.isPrivate = false OR p.ownerId = :userId)") // TODO: wtf
+    @Query("SELECT p FROM Playlist p WHERE p.ownerId = :ownerId AND (p.isPrivate = false OR p.ownerId = :userId)")
     Page<Playlist> findByOwnerIdWithAccessControl(Long ownerId, @Nullable Long userId, Pageable pageable);
+
+    Set<Playlist> findByManagerType(ManagerType type);
 }

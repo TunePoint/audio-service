@@ -52,6 +52,7 @@ subprojects {
             dependency 'org.projectlombok:lombok:1.18.22'
             dependency 'org.postgresql:postgresql:42.3.3'
             dependency 'org.hibernate.validator:hibernate-validator:6.2.2.Final'
+            dependency 'io.github.resilience4j:resilience4j-spring-boot2:1.7.1'
 
             dependency 'org.liquibase:liquibase-core:4.9.0'
 

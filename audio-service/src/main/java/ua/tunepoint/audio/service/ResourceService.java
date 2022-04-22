@@ -1,5 +1,6 @@
 package ua.tunepoint.audio.service;
 
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,7 @@ public class ResourceService {
     private final ResourceClient client;
     private final ResourceMapper resourceMapper;
 
+    @CircuitBreaker(name = "resource-service", fallbackMethod = "getResourceFallback")
     public Optional<Resource> getImage(String id) {
 
         var response = client.getImage(id);
@@ -37,6 +39,7 @@ public class ResourceService {
         return Optional.ofNullable(resourceMapper.toPayload(response.getBody().getPayload()));
     }
 
+    @CircuitBreaker(name = "resource-service", fallbackMethod = "getResourceFallback")
     public Optional<Resource> getAudio(String id) {
 
         var response = client.getAudio(id);
@@ -53,5 +56,10 @@ public class ResourceService {
         }
 
         return Optional.ofNullable(resourceMapper.toPayload(response.getBody().getPayload()));
+    }
+
+    public Optional<Resource> getResourceFallback(String id, Throwable ex) {
+        log.error("Error occurred while calling resource service", ex);
+        return Optional.of(Resource.builder().id(id).build());
     }
 }
