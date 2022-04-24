@@ -19,8 +19,8 @@ import ua.tunepoint.audio.security.CommonVisibilityAccessManager;
 import ua.tunepoint.audio.security.audio.AudioUpdateAccessManager;
 import ua.tunepoint.audio.security.audio.AudioVisibilityAccessManager;
 import ua.tunepoint.audio.service.support.AudioSmartMapper;
+import ua.tunepoint.audio.utils.EventUtils;
 import ua.tunepoint.event.starter.publisher.EventPublisher;
-import ua.tunepoint.security.UserPrincipal;
 import ua.tunepoint.web.exception.BadRequestException;
 import ua.tunepoint.web.exception.NotFoundException;
 
@@ -28,9 +28,10 @@ import javax.annotation.Nullable;
 
 import static java.util.Collections.singletonList;
 import static ua.tunepoint.audio.model.event.Domain.AUDIO;
-import static ua.tunepoint.audio.utils.EventUtils.toCreateEvent;
+import static ua.tunepoint.audio.utils.EventUtils.toCreatedEvent;
 import static ua.tunepoint.audio.utils.EventUtils.toLikeEvent;
 import static ua.tunepoint.audio.utils.EventUtils.toUnlikeEvent;
+import static ua.tunepoint.audio.utils.EventUtils.toUpdatedEvent;
 
 @Service
 @RequiredArgsConstructor
@@ -61,33 +62,33 @@ public class AudioService {
     // 7. publishing audio.created event
     // the method does a lot of work. should think about how it can be split
     @Transactional
-    public AudioPayload save(AudioPostRequest request, @NotNull UserPrincipal user) {
+    public AudioPayload save(AudioPostRequest request, @NotNull Long user) {
 
         var content = getAudioRequired(request.getContentId());
         var cover = getImageRequired(request.getCoverId());
 
-        var audio = requestMapper.toEntity(request, user.getId());
+        var audio = requestMapper.toEntity(request, user);
         var savedAudio = audioRepository.save(audio);
 
         var payload = audioSmartMapper.toPayload(savedAudio, content, cover);
 
         publisher.publish(AUDIO.getName(),
-                singletonList(toCreateEvent(audio, user.getId()))
+                singletonList(EventUtils.toCreatedEvent(audio, user))
         );
         return payload;
     }
 
-    public Page<AudioPayload> findByUser(@NotNull Long userId, @Nullable UserPrincipal currentUser, Pageable pageable) {
-        var owner = userService.findUser(userId)
-                .orElseThrow(() -> new NotFoundException("User with id " + userId + " was not found" ));
+    public Page<AudioPayload> findByOwner(@NotNull Long ownerId, @Nullable Long currentUser, Pageable pageable) {
+        var owner = userService.findUser(ownerId)
+                .orElseThrow(() -> new NotFoundException("User with id " + ownerId + " was not found" ));
 
-        Page<Audio> page = userId.equals(extractId(currentUser)) ? audioRepository.findAudioByOwnerId(userId, pageable)
-                : audioRepository.findAudioByOwnerIdAndIsPrivateFalse(userId, pageable);
+        Page<Audio> page = ownerId.equals(currentUser) ? audioRepository.findAudioByOwnerId(ownerId, pageable)
+                : audioRepository.findAudioByOwnerIdAndIsPrivateFalse(ownerId, pageable);
 
         return page.map(it -> audioSmartMapper.toPayload(it, owner));
     }
 
-    public AudioPayload find(Long audioId, UserPrincipal user) {
+    public AudioPayload find(Long audioId, Long user) {
         var audio = audioRepository.findById(audioId)
                 .orElseThrow(() -> new NotFoundException("Audio with id " + audioId + " was not found"));
 
@@ -96,7 +97,8 @@ public class AudioService {
         return audioSmartMapper.toPayload(audio);
     }
 
-    public AudioPayload update(Long id, AudioPostRequest request, UserPrincipal user) {
+    @Transactional
+    public AudioPayload update(Long id, AudioPostRequest request, Long user) {
         var audio = audioRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Audio with id " + id + " was not found"));
 
@@ -109,16 +111,21 @@ public class AudioService {
 
         var savedAudio = audioRepository.save(audio);
 
+        publisher.publish(
+                AUDIO.getName(),
+                singletonList(toUpdatedEvent(savedAudio))
+        );
+
         return audioSmartMapper.toPayload(savedAudio, content, cover);
     }
 
-    public void like(Long audioId, @NotNull UserPrincipal user) {
+    public void like(Long audioId, @NotNull Long user) {
         var audio = audioRepository.findById(audioId)
                 .orElseThrow(() -> new NotFoundException("Audio with id " + audioId + " was not found"));
 
         visibilityAccessManager.authorize(user, audio);
 
-        var likeIdentity = audioMapper.toLikeIdentity(audioId, user.getId());
+        var likeIdentity = audioMapper.toLikeIdentity(audioId, user);
         if (audioLikeRepository.existsByLikeIdentity(likeIdentity)) {
             throw new BadRequestException("Like is already set");
         }
@@ -126,18 +133,19 @@ public class AudioService {
         var like = audioMapper.toAudioLike(likeIdentity);
         audioLikeRepository.save(like);
 
-        publisher.publish(AUDIO.getName(),
-                singletonList(toLikeEvent(audio, user.getId()))
+        publisher.publish(
+                AUDIO.getName(),
+                singletonList(toLikeEvent(audio, user))
         );
     }
 
-    public void unlike(Long audioId, @NotNull UserPrincipal user) {
+    public void unlike(Long audioId, @NotNull Long user) {
         var audio = audioRepository.findById(audioId)
                 .orElseThrow(() -> new NotFoundException("Audio with id " + audioId + " was not found"));
 
         visibilityAccessManager.authorize(user, audio);
 
-        var likeIdentity = audioMapper.toLikeIdentity(audioId, user.getId());
+        var likeIdentity = audioMapper.toLikeIdentity(audioId, user);
         if (!audioLikeRepository.existsByLikeIdentity(likeIdentity)) {
             throw new BadRequestException("Like is not set");
         }
@@ -146,18 +154,18 @@ public class AudioService {
         audioLikeRepository.delete(like);
 
         publisher.publish(AUDIO.getName(),
-                singletonList(toUnlikeEvent(audio, user.getId()))
+                singletonList(toUnlikeEvent(audio, user))
         );
     }
 
-    public Page<AudioPayload> findByPlaylist(Long playlistId, UserPrincipal user, Pageable pageable) {
+    public Page<AudioPayload> findByPlaylist(Long playlistId, Long user, Pageable pageable) {
 
         var playlist = playlistRepository.findById(playlistId)
                 .orElseThrow(NotFoundException::new);
 
         commonVisibilityAccessManager.authorize(user, playlist);
 
-        Page<Audio> audioPage = audioRepository.findAudioByPlaylistWithAccess(playlistId, extractId(user), pageable);
+        Page<Audio> audioPage = audioRepository.findAudioFromPlaylistProtected(playlistId, user, pageable);
 
         return audioPage.map(audioSmartMapper::toPayload);
     }
@@ -170,9 +178,5 @@ public class AudioService {
     private Resource getAudioRequired(String id) {
         return resourceService.getAudio(id)
                 .orElseThrow(() -> new BadRequestException("Audio with id '" + id + "' was not found"));
-    }
-
-    private Long extractId(@Nullable UserPrincipal user) {
-        return user == null ? null : user.getId();
     }
 }

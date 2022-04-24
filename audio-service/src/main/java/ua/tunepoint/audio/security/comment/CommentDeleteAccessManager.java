@@ -7,11 +7,11 @@ import ua.tunepoint.security.UserPrincipal;
 import ua.tunepoint.web.exception.ForbiddenException;
 
 @Component
-public class CommentDeleteAccessManager implements AccessManager<UserPrincipal, Comment> {
+public class CommentDeleteAccessManager implements AccessManager<Long, Comment> {
 
     @Override
-    public void authorize(UserPrincipal user, Comment comment) {
-        if (user == null || !comment.getUserId().equals(user.getId())) {
+    public void authorize(Long user, Comment comment) {
+        if (!comment.getUserId().equals(user)) {
             throw new ForbiddenException();
         }
 

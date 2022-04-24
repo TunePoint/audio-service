@@ -8,10 +8,10 @@ import ua.tunepoint.security.UserPrincipal;
 import ua.tunepoint.web.exception.ForbiddenException;
 
 @Component
-public class PlaylistInteractionAccessManager implements AccessManager<UserPrincipal, PlaylistAccessibleEntity> {
+public class PlaylistInteractionAccessManager implements AccessManager<Long, PlaylistAccessibleEntity> {
 
     @Override
-    public void authorize(UserPrincipal user, PlaylistAccessibleEntity playlist) {
+    public void authorize(Long user, PlaylistAccessibleEntity playlist) {
         if (playlist.getManagerType() != ManagerType.USER) {
             throw new ForbiddenException("You can't interact like that with service playlist");
         }

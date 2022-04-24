@@ -3,6 +3,7 @@ package ua.tunepoint.audio.service;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import ua.tunepoint.audio.model.response.domain.Resource;
@@ -20,7 +21,7 @@ public class ResourceService {
     private final ResourceClient client;
     private final ResourceMapper resourceMapper;
 
-    @CircuitBreaker(name = "resource-service", fallbackMethod = "getResourceFallback")
+    @CircuitBreaker(name = "resource-service")
     public Optional<Resource> getImage(String id) {
 
         var response = client.getImage(id);
@@ -31,7 +32,8 @@ public class ResourceService {
         }
 
         if (response.getBody() == null || response.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
-            log.warn("Not found response from ResourceClient");
+            MDC.put("Id", id);
+            log.warn("image was not found");
 
             return Optional.empty();
         }
@@ -39,7 +41,7 @@ public class ResourceService {
         return Optional.ofNullable(resourceMapper.toPayload(response.getBody().getPayload()));
     }
 
-    @CircuitBreaker(name = "resource-service", fallbackMethod = "getResourceFallback")
+    @CircuitBreaker(name = "resource-service")
     public Optional<Resource> getAudio(String id) {
 
         var response = client.getAudio(id);
@@ -50,16 +52,12 @@ public class ResourceService {
         }
 
         if (response.getBody() == null || response.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
-            log.warn("Not found response from ResourceClient");
+            MDC.put("Id", id);
+            log.warn("audio was not found");
 
             return Optional.empty();
         }
 
         return Optional.ofNullable(resourceMapper.toPayload(response.getBody().getPayload()));
-    }
-
-    public Optional<Resource> getResourceFallback(String id, Throwable ex) {
-        log.error("Error occurred while calling resource service", ex);
-        return Optional.of(Resource.builder().id(id).build());
     }
 }

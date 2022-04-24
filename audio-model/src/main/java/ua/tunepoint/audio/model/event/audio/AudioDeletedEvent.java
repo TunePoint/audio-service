@@ -8,11 +8,10 @@ import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
 import ua.tunepoint.event.model.DomainEvent;
 
-import java.time.LocalDateTime;
-
 @Data
 @SuperBuilder
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class AudioCreateEvent extends BaseAudioEvent {
+public class AudioDeletedEvent extends BaseAudioEvent {
+
 }

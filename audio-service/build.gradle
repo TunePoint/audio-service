@@ -29,6 +29,7 @@ dependencies {
     implementation 'ua.tunepoint:commons-web-exception'
     implementation 'ua.tunepoint:account-api'
     implementation 'ua.tunepoint:account-model'
+    implementation 'ua.tunepoint:auth-model'
 
     compileOnly 'org.projectlombok:lombok'
     compileOnly 'org.mapstruct:mapstruct-processor'

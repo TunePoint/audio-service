@@ -9,16 +9,12 @@ import ua.tunepoint.web.exception.ForbiddenException;
 import java.util.Objects;
 
 @Component
-public class AudioUpdateAccessManager implements AccessManager<UserPrincipal, Audio> {
+public class AudioUpdateAccessManager implements AccessManager<Long, Audio> {
 
     @Override
-    public void authorize(UserPrincipal userIdentity, Audio objectIdentity) {
-        if (!Objects.equals(objectIdentity.getOwnerId(), extractId(userIdentity))) {
+    public void authorize(Long userIdentity, Audio objectIdentity) {
+        if (!Objects.equals(objectIdentity.getOwnerId(), userIdentity)) {
             throw new ForbiddenException();
         }
-    }
-
-    private Long extractId(UserPrincipal user) {
-        return user == null ? null : user.getId();
     }
 }

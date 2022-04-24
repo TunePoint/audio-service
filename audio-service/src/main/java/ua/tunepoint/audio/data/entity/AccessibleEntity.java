@@ -1,8 +1,7 @@
 package ua.tunepoint.audio.data.entity;
 
-public interface AccessibleEntity {
+public interface AccessibleEntity extends IdEntity{
 
-    Long getId();
     Long getOwnerId();
     Boolean getIsPrivate();
 

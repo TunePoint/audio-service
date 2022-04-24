@@ -24,5 +24,5 @@ public interface PlaylistRepository extends PagingAndSortingRepository<Playlist,
     @Query("SELECT p FROM Playlist p WHERE p.ownerId = :ownerId AND (p.isPrivate = false OR p.ownerId = :userId)")
     Page<Playlist> findByOwnerIdWithAccessControl(Long ownerId, @Nullable Long userId, Pageable pageable);
 
-    Set<Playlist> findByManagerType(ManagerType type);
+    <T> Set<T> findByManagerTypeAndOwnerId(ManagerType type, Long ownerId, Class<T> projection);
 }

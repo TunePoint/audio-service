@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import ua.tunepoint.audio.data.entity.playlist.ManagerType;
 import ua.tunepoint.audio.model.request.PlaylistPostRequest;
 import ua.tunepoint.audio.model.request.PlaylistUpdateRequest;
 import ua.tunepoint.audio.model.response.PlaylistGetResponse;
@@ -22,6 +23,8 @@ import ua.tunepoint.audio.model.response.payload.PlaylistPayload;
 import ua.tunepoint.audio.service.PlaylistService;
 import ua.tunepoint.security.UserPrincipal;
 import ua.tunepoint.web.model.StatusResponse;
+
+import static ua.tunepoint.audio.utils.UserUtils.extractId;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,7 +36,7 @@ public class PlaylistController {
     @PostMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PlaylistPostResponse> postPlaylist(@RequestBody PlaylistPostRequest request, @AuthenticationPrincipal UserPrincipal user) {
-        var payload = service.create(request, user);
+        var payload = service.create(request, ManagerType.USER, extractId(user));
         var response = PlaylistPostResponse.builder().payload(payload).build();
         return ResponseEntity.ok(response);
     }
@@ -41,21 +44,21 @@ public class PlaylistController {
     @DeleteMapping("/{playlistId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<StatusResponse> deletePlaylist(@PathVariable Long playlistId, @AuthenticationPrincipal UserPrincipal user) {
-        service.delete(playlistId, user);
+        service.delete(playlistId, extractId(user));
         return ResponseEntity.ok(StatusResponse.builder().build());
     }
 
     @PutMapping("/{playlistId}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<PlaylistUpdateResponse> updatePlaylist(@PathVariable Long playlistId, @RequestBody PlaylistUpdateRequest request, @AuthenticationPrincipal UserPrincipal user) {
-        var payload = service.update(playlistId, request, user);
+        var payload = service.update(playlistId, request, extractId(user));
         var response = PlaylistUpdateResponse.builder().payload(payload).build();
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{playlistId}")
     public ResponseEntity<PlaylistGetResponse> getPlaylist(@PathVariable Long playlistId, @AuthenticationPrincipal UserPrincipal user) {
-        var payload = service.findById(playlistId, user);
+        var payload = service.findById(playlistId, extractId(user));
         var response = PlaylistGetResponse.builder().payload(payload).build();
         return ResponseEntity.ok(response);
     }
@@ -63,28 +66,28 @@ public class PlaylistController {
     @PostMapping("/{playlistId}/likes")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<StatusResponse> likePlaylist(@PathVariable Long playlistId, @AuthenticationPrincipal UserPrincipal user) {
-        service.like(playlistId, user);
+        service.like(playlistId, extractId(user));
         return ResponseEntity.ok(StatusResponse.builder().build());
     }
 
     @DeleteMapping("/{playlistId}/likes")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<StatusResponse> unlikePlaylist(@PathVariable Long playlistId, @AuthenticationPrincipal UserPrincipal user) {
-        service.unlike(playlistId, user);
+        service.unlike(playlistId, extractId(user));
         return ResponseEntity.ok(StatusResponse.builder().build());
     }
 
     @PostMapping("/{playlistId}/audio")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<StatusResponse> addAudioToPlaylist(@PathVariable Long playlistId, @RequestParam(name = "audioId") Long audioId, @AuthenticationPrincipal UserPrincipal user) {
-        service.addAudio(playlistId, audioId, user);
+        service.addAudio(playlistId, audioId, extractId(user));
         return ResponseEntity.ok(StatusResponse.builder().build());
     }
 
     @DeleteMapping("/{playlistId}/audio")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<StatusResponse> removeAudioFromPlaylist(@PathVariable Long playlistId, @RequestParam(name = "audioId") Long audioId, @AuthenticationPrincipal UserPrincipal user) {
-        service.removeAudio(playlistId, audioId, user);
+        service.removeAudio(playlistId, audioId, extractId(user));
         return ResponseEntity.ok(StatusResponse.builder().build());
     }
 }
