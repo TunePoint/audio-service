@@ -1,36 +1,46 @@
 package ua.tunepoint.audio.utils;
 
 import lombok.experimental.UtilityClass;
+import ua.tunepoint.audio.data.entity.AccessibleEntity;
+import ua.tunepoint.audio.data.entity.PlaylistAccessibleEntity;
 import ua.tunepoint.audio.data.entity.audio.Audio;
 import ua.tunepoint.audio.data.entity.comment.Comment;
 import ua.tunepoint.audio.data.entity.playlist.Playlist;
 import ua.tunepoint.audio.model.event.audio.AudioCreateEvent;
+import ua.tunepoint.audio.model.event.audio.AudioDeletedEvent;
 import ua.tunepoint.audio.model.event.audio.AudioLikeEvent;
 import ua.tunepoint.audio.model.event.audio.AudioUnlikeEvent;
+import ua.tunepoint.audio.model.event.audio.AudioUpdatedEvent;
 import ua.tunepoint.audio.model.event.comment.AudioCommentCreateEvent;
 import ua.tunepoint.audio.model.event.comment.AudioCommentDeleteEvent;
 import ua.tunepoint.audio.model.event.comment.AudioCommentLikeEvent;
 import ua.tunepoint.audio.model.event.comment.AudioCommentReplyEvent;
 import ua.tunepoint.audio.model.event.comment.AudioCommentUnlikeEvent;
 import ua.tunepoint.audio.model.event.comment.AudioCommentUpdateEvent;
-import ua.tunepoint.audio.model.event.playlist.PlaylistCreateEvent;
+import ua.tunepoint.audio.model.event.playlist.PlaylistAudioAddedEvent;
+import ua.tunepoint.audio.model.event.playlist.PlaylistAudioRemovedEvent;
+import ua.tunepoint.audio.model.event.playlist.PlaylistCreatedEvent;
+import ua.tunepoint.audio.model.event.playlist.PlaylistDeletedEvent;
+import ua.tunepoint.audio.model.event.playlist.PlaylistLikedEvent;
+import ua.tunepoint.audio.model.event.playlist.PlaylistUnlikedEvent;
+import ua.tunepoint.audio.model.event.playlist.PlaylistUpdatedEvent;
 
 import java.time.LocalDateTime;
 
 @UtilityClass
 public class EventUtils {
 
-    public static AudioCreateEvent toCreateEvent(Audio audio, Long userId) {
+    public static AudioCreateEvent toCreatedEvent(Audio audio, Long userId) {
         return AudioCreateEvent.builder()
                 .audioId(audio.getId())
-                .userId(userId)
+                .audioOwnerId(userId)
                 .time(LocalDateTime.now())
                 .build();
     }
 
     public static AudioLikeEvent toLikeEvent(Audio audio, Long userId) {
         return AudioLikeEvent.builder()
-                .ownerId(audio.getOwnerId())
+                .audioOwnerId(audio.getOwnerId())
                 .audioId(audio.getId())
                 .userId(userId)
                 .time(LocalDateTime.now())
@@ -39,19 +49,39 @@ public class EventUtils {
 
     public static AudioUnlikeEvent toUnlikeEvent(Audio audio, Long userId) {
         return AudioUnlikeEvent.builder()
-                .ownerId(audio.getOwnerId())
+                .audioOwnerId(audio.getOwnerId())
                 .audioId(audio.getId())
                 .userId(userId)
                 .time(LocalDateTime.now())
                 .build();
     }
 
-    public static AudioCommentCreateEvent toCreateEvent(Comment comment, Audio audio, Long userId) {
+    public static AudioCommentCreateEvent toCreatedEvent(Comment comment, Audio audio, Long userId) {
         return AudioCommentCreateEvent.builder()
                 .commentId(comment.getId())
                 .audioId(audio.getId())
                 .audioOwnerId(audio.getOwnerId())
                 .userId(userId)
+                .time(LocalDateTime.now())
+                .build();
+    }
+
+    public static AudioDeletedEvent toDeletedEvent(Audio audio) {
+        return AudioDeletedEvent.builder()
+                .audioId(audio.getId())
+                .audioOwnerId(audio.getOwnerId())
+                .time(LocalDateTime.now())
+                .build();
+    }
+
+    public static AudioUpdatedEvent toUpdatedEvent(Audio audio) {
+        return AudioUpdatedEvent.builder()
+                .audioId(audio.getId())
+                .audioOwnerId(audio.getOwnerId())
+                .title(audio.getTitle())
+                .description(audio.getDescription())
+                .coverId(audio.getCoverId())
+                .contentId(audio.getContentId())
                 .time(LocalDateTime.now())
                 .build();
     }
@@ -110,10 +140,68 @@ public class EventUtils {
                 .build();
     }
 
-    public static PlaylistCreateEvent toCreateEvent(Playlist playlist) {
-        return PlaylistCreateEvent.builder()
+    public static PlaylistCreatedEvent toCreatedEvent(PlaylistAccessibleEntity playlist) {
+        return PlaylistCreatedEvent.builder()
                 .playlistId(playlist.getId())
                 .playlistOwnerId(playlist.getOwnerId())
+                .time(LocalDateTime.now())
+                .build();
+    }
+
+    public static PlaylistUpdatedEvent toUpdatedEvent(Playlist playlist) {
+        return PlaylistUpdatedEvent.builder()
+                .playlistId(playlist.getId())
+                .playlistOwnerId(playlist.getOwnerId())
+                .title(playlist.getTitle())
+                .description(playlist.getDescription())
+                .time(LocalDateTime.now())
+                .build();
+    }
+
+    public static PlaylistDeletedEvent toDeletedEvent(PlaylistAccessibleEntity playlist) {
+        return PlaylistDeletedEvent.builder()
+                .playlistId(playlist.getId())
+                .playlistOwnerId(playlist.getOwnerId())
+                .time(LocalDateTime.now())
+                .build();
+    }
+
+    public static PlaylistLikedEvent toLikedEvent(PlaylistAccessibleEntity playlist, Long userId) {
+        return PlaylistLikedEvent.builder()
+                .playlistId(playlist.getId())
+                .playlistOwnerId(playlist.getOwnerId())
+                .time(LocalDateTime.now())
+                .userId(userId)
+                .build();
+    }
+
+    public static PlaylistUnlikedEvent toUnlikedEvent(PlaylistAccessibleEntity playlist, Long userId) {
+        return PlaylistUnlikedEvent.builder()
+                .playlistId(playlist.getId())
+                .playlistOwnerId(playlist.getOwnerId())
+                .time(LocalDateTime.now())
+                .userId(userId)
+                .build();
+    }
+
+    public static PlaylistAudioAddedEvent toAddedEvent(PlaylistAccessibleEntity playlist, AccessibleEntity audio, Long userId) {
+        return PlaylistAudioAddedEvent.builder()
+                .playlistId(playlist.getId())
+                .playlistOwnerId(playlist.getOwnerId())
+                .audioId(audio.getId())
+                .audioOwnerId(audio.getOwnerId())
+                .userId(userId)
+                .time(LocalDateTime.now())
+                .build();
+    }
+
+    public static PlaylistAudioRemovedEvent toRemovedEvent(PlaylistAccessibleEntity playlist, AccessibleEntity audio, Long userId) {
+        return PlaylistAudioRemovedEvent.builder()
+                .playlistId(playlist.getId())
+                .playlistOwnerId(playlist.getOwnerId())
+                .audioId(audio.getId())
+                .audioOwnerId(audio.getOwnerId())
+                .userId(userId)
                 .time(LocalDateTime.now())
                 .build();
     }

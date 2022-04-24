@@ -6,10 +6,10 @@ import ua.tunepoint.audio.security.AccessManager;
 import ua.tunepoint.security.UserPrincipal;
 
 @Component
-public class AudioNoopAccessManager implements AccessManager<UserPrincipal, Audio> {
+public class AudioNoopAccessManager implements AccessManager<Long, Audio> {
 
     @Override
-    public void authorize(UserPrincipal userIdentity, Audio objectIdentity) {
+    public void authorize(Long userIdentity, Audio objectIdentity) {
 
     }
 }

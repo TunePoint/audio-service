@@ -19,7 +19,10 @@ public interface AudioRepository extends PagingAndSortingRepository<Audio, Long>
     Page<Audio> findAudioByOwnerId(Long ownerId, Pageable pageable);
 
     @Query("SELECT a FROM Audio a JOIN PlaylistAudio pa ON pa.id.audioId = a.id WHERE pa.id.playlistId = :playlistId AND (a.isPrivate = FALSE OR a.ownerId = :userId)")
-    Page<Audio> findAudioByPlaylistWithAccess(Long playlistId, Long userId, Pageable pageable);
+    Page<Audio> findAudioFromPlaylistProtected(Long playlistId, Long userId, Pageable pageable);
+
+    @Query("SELECT a FROM Audio a JOIN PlaylistAudio pa ON pa.id.audioId = a.id WHERE pa.id.playlistId = :playlistId")
+    Page<Audio> findAudioFromPlaylist(Long playlistId, Pageable pageable);
 
     <T> Set<T> findAllByIdIn(Set<Long> ids, Class<T> projection);
 

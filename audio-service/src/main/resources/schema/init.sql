@@ -25,14 +25,14 @@ CREATE TABLE audio.audio
 
 CREATE TABLE audio.audio_genres
 (
-    audio_id INTEGER REFERENCES audio.audio(id),
+    audio_id INTEGER REFERENCES audio.audio(id) ON DELETE CASCADE,
     genre_id INTEGER REFERENCES audio.genres(id),
 
     CONSTRAINT audio_genres_pk PRIMARY KEY(audio_id, genre_id)
 );
 
 CREATE TABLE audio.audio_stats (
-    id INTEGER PRIMARY KEY REFERENCES audio.audio(id),
+    id INTEGER PRIMARY KEY REFERENCES audio.audio(id) ON DELETE CASCADE,
 
     like_count INTEGER DEFAULT 0,
     listening_count INTEGER DEFAULT 0,
@@ -41,7 +41,7 @@ CREATE TABLE audio.audio_stats (
 
 CREATE TABLE audio.audio_likes
 (
-    audio_id INTEGER REFERENCES audio.audio(id),
+    audio_id INTEGER REFERENCES audio.audio(id) ON DELETE CASCADE,
     user_id INTEGER NOT NULL,
     created_at TIMESTAMP,
 
@@ -60,7 +60,7 @@ CREATE TABLE audio.comments
 (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
-    audio_id INTEGER REFERENCES audio.audio(id),
+    audio_id INTEGER REFERENCES audio.audio(id) ON DELETE CASCADE,
     content VARCHAR(512),
     created_at TIMESTAMP,
     updated_at TIMESTAMP,
@@ -73,14 +73,14 @@ CREATE TABLE audio.comments
 
 CREATE TABLE audio.comments_stats
 (
-    id INTEGER PRIMARY KEY REFERENCES audio.comments(id),
+    id INTEGER PRIMARY KEY REFERENCES audio.comments(id) ON DELETE CASCADE,
     like_count INTEGER DEFAULT 0 NOT NULL,
     reply_count INTEGER DEFAULT 0 NOT NULL
 );
 
 CREATE TABLE audio.comments_likes
 (
-    comment_id INTEGER REFERENCES audio.comments(id),
+    comment_id INTEGER REFERENCES audio.comments(id) ON DELETE CASCADE,
     user_id INTEGER NOT NULL,
     created_at TIMESTAMP,
 
@@ -94,7 +94,7 @@ CREATE TABLE audio.playlists
     description VARCHAR(256),
     owner_id BIGINT NOT NULL,
     is_private BOOLEAN DEFAULT FALSE,
-    is_service BOOLEAN DEFAULT FALSE,
+    manager_type INT NOT NULL,
     cover_id VARCHAR
 );
 

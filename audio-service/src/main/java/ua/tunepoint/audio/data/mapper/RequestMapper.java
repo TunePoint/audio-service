@@ -7,6 +7,7 @@ import org.mapstruct.MappingTarget;
 import org.mapstruct.Mappings;
 import ua.tunepoint.audio.data.entity.audio.Audio;
 import ua.tunepoint.audio.data.entity.comment.Comment;
+import ua.tunepoint.audio.data.entity.playlist.ManagerType;
 import ua.tunepoint.audio.data.entity.playlist.Playlist;
 import ua.tunepoint.audio.model.request.AudioCommentPostRequest;
 import ua.tunepoint.audio.model.request.AudioPostRequest;
@@ -24,7 +25,7 @@ public interface RequestMapper {
             @Mapping(target = "isPrivate", source = "request.isPrivate"),
             @Mapping(target = "contentId", source = "request.contentId"),
             @Mapping(target = "coverId", source = "request.coverId"),
-            @Mapping(target = "ownerId", source = "userId")
+            @Mapping(target = "ownerId", source = "userId"),
     })
     Audio toEntity(AudioPostRequest request, Long userId);
 
@@ -42,7 +43,8 @@ public interface RequestMapper {
             @Mapping(target = "title", source = "request.title"),
             @Mapping(target = "description", source = "request.description"),
             @Mapping(target = "isPrivate", source = "request.isPrivate"),
-            @Mapping(target = "coverId", source = "request.coverId")
+            @Mapping(target = "coverId", source = "request.coverId"),
+            @Mapping(target = "managerType", source = "manager")
     })
-    Playlist toEntity(PlaylistPostRequest request, Long userId);
+    Playlist toEntity(PlaylistPostRequest request, ManagerType manager, Long userId);
 }

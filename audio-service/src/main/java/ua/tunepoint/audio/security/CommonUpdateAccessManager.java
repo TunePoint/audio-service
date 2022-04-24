@@ -8,16 +8,12 @@ import ua.tunepoint.web.exception.ForbiddenException;
 import java.util.Objects;
 
 @Component
-public class CommonUpdateAccessManager implements AccessManager<UserPrincipal, AccessibleEntity>{
+public class CommonUpdateAccessManager implements AccessManager<Long, AccessibleEntity>{
 
     @Override
-    public void authorize(UserPrincipal userIdentity, AccessibleEntity objectIdentity) {
-        if (!Objects.equals(extractUserId(userIdentity), objectIdentity.getOwnerId())) {
+    public void authorize(Long user, AccessibleEntity objectIdentity) {
+        if (!Objects.equals(user, objectIdentity.getOwnerId())) {
             throw new ForbiddenException();
         }
-    }
-
-    private Long extractUserId(UserPrincipal user) {
-        return user == null ? null : user.getId();
     }
 }

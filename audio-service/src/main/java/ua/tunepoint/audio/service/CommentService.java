@@ -21,16 +21,14 @@ import ua.tunepoint.audio.security.comment.CommentDeleteAccessManager;
 import ua.tunepoint.audio.security.comment.CommentUpdateAccessManager;
 import ua.tunepoint.audio.service.support.CommentSmartMapper;
 import ua.tunepoint.event.starter.publisher.EventPublisher;
-import ua.tunepoint.security.UserPrincipal;
 import ua.tunepoint.web.exception.BadRequestException;
 import ua.tunepoint.web.exception.NotFoundException;
 
 import javax.annotation.Nullable;
-
 import java.util.Collections;
 
 import static ua.tunepoint.audio.model.event.Domain.AUDIO_COMMENT;
-import static ua.tunepoint.audio.utils.EventUtils.toCreateEvent;
+import static ua.tunepoint.audio.utils.EventUtils.toCreatedEvent;
 import static ua.tunepoint.audio.utils.EventUtils.toDeleteEvent;
 import static ua.tunepoint.audio.utils.EventUtils.toLikeEvent;
 import static ua.tunepoint.audio.utils.EventUtils.toReplyEvent;
@@ -56,26 +54,26 @@ public class CommentService {
     private final EventPublisher publisher;
 
     @Transactional
-    public CommentPayload save(Long audioId, AudioCommentPostRequest request, UserPrincipal user) {
+    public CommentPayload save(Long audioId, AudioCommentPostRequest request, Long user) {
 
         var audio = findAudioElseThrow(audioId);
 
         audioVisibilityAccessManager.authorize(user, audio);
 
-        var comment = requestMapper.toEntity(request, user.getId());
+        var comment = requestMapper.toEntity(request, user);
         comment.setAudio(audio);
 
         var savedComment = commentRepository.save(comment);
         var payload = commentSmartMapper.toPayload(savedComment);
 
         publisher.publish(AUDIO_COMMENT.getName(),
-                Collections.singletonList(toCreateEvent(comment, audio, user.getId()))
+                Collections.singletonList(toCreatedEvent(comment, audio, user))
         );
 
         return payload;
     }
 
-    public Page<CommentPayload> find(Long audioId, Pageable pageable, @Nullable UserPrincipal user) {
+    public Page<CommentPayload> find(Long audioId, @Nullable Long user, Pageable pageable) {
 
         var audio = findAudioElseThrow(audioId);
 
@@ -85,7 +83,7 @@ public class CommentService {
         return comments.map(commentSmartMapper::toPayload);
     }
 
-    public CommentPayload find(Long id, @Nullable UserPrincipal user) {
+    public CommentPayload find(Long id, @Nullable Long user) {
         var comment = findCommentElseThrow(id);
 
         audioVisibilityAccessManager.authorize(user, comment.getAudio());
@@ -94,7 +92,7 @@ public class CommentService {
     }
 
     @Transactional
-    public CommentPayload update(Long commentId, AudioCommentUpdateRequest request, UserPrincipal user) {
+    public CommentPayload update(Long commentId, AudioCommentUpdateRequest request, Long user) {
 
         var comment = findCommentElseThrow(commentId);
 
@@ -106,14 +104,14 @@ public class CommentService {
         var payload = commentSmartMapper.toPayload(updatedComment);
 
         publisher.publish(AUDIO_COMMENT.getName(),
-                Collections.singletonList(toUpdateEvent(updatedComment, comment.getAudio(), user.getId()))
+                Collections.singletonList(toUpdateEvent(updatedComment, comment.getAudio(), user))
         );
 
         return payload;
     }
 
     @Transactional
-    public CommentPayload delete(Long commentId, UserPrincipal user) {
+    public CommentPayload delete(Long commentId, Long user) {
         var comment = findCommentElseThrow(commentId);
 
         audioVisibilityAccessManager.authorize(user, comment.getAudio());
@@ -127,53 +125,53 @@ public class CommentService {
         var payload = commentSmartMapper.toPayload(deletedComment);
 
         publisher.publish(AUDIO_COMMENT.getName(),
-                Collections.singletonList(toDeleteEvent(deletedComment, comment.getAudio(), user.getId()))
+                Collections.singletonList(toDeleteEvent(deletedComment, comment.getAudio(), user))
         );
 
         return payload;
     }
 
     @Transactional
-    public void like(Long commentId, @NotNull UserPrincipal user) {
+    public void like(Long commentId, @NotNull Long user) {
 
         var comment = findCommentElseThrow(commentId);
         audioVisibilityAccessManager.authorize(user, comment.getAudio());
 
-        var like = commentMapper.toLike(commentId, user.getId());
+        var like = commentMapper.toLike(commentId, user);
         if (likeRepository.existsByIdentity(like.getIdentity())) {
             throw new BadRequestException("You already liked this comment");
         }
         likeRepository.save(like);
 
         publisher.publish(AUDIO_COMMENT.getName(),
-                Collections.singletonList(toLikeEvent(comment, comment.getAudio(), user.getId()))
+                Collections.singletonList(toLikeEvent(comment, comment.getAudio(), user))
         );
     }
 
     @Transactional
-    public void unlike(Long commentId, @NotNull UserPrincipal user) {
+    public void unlike(Long commentId, @NotNull Long user) {
 
         var comment = findCommentElseThrow(commentId);
         audioVisibilityAccessManager.authorize(user, comment.getAudio());
 
-        var like = commentMapper.toLike(commentId, user.getId());
+        var like = commentMapper.toLike(commentId, user);
         if (!likeRepository.existsByIdentity(like.getIdentity())) {
             throw new BadRequestException("Like is not set");
         }
         likeRepository.delete(like);
 
         publisher.publish(AUDIO_COMMENT.getName(),
-                Collections.singletonList(toUnlikeEvent(comment, comment.getAudio(), user.getId()))
+                Collections.singletonList(toUnlikeEvent(comment, comment.getAudio(), user))
         );
     }
 
     @Transactional
-    public CommentPayload reply(Long commentId, AudioCommentPostRequest request, UserPrincipal user) {
+    public CommentPayload reply(Long commentId, AudioCommentPostRequest request, Long user) {
         var comment = findCommentElseThrow(commentId);
 
         audioVisibilityAccessManager.authorize(user, comment.getAudio());
 
-        var replyComment = requestMapper.toEntity(request, user.getId());
+        var replyComment = requestMapper.toEntity(request, user);
 
         replyComment.reply(comment);
 
@@ -182,7 +180,7 @@ public class CommentService {
         var payload = commentSmartMapper.toPayload(replyComment);
 
         publisher.publish(AUDIO_COMMENT.getName(),
-                Collections.singletonList(toReplyEvent(comment, replyComment, comment.getAudio(), user.getId()))
+                Collections.singletonList(toReplyEvent(comment, replyComment, comment.getAudio(), user))
         );
 
         return payload;

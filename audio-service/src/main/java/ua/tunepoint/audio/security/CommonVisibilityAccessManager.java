@@ -8,16 +8,12 @@ import ua.tunepoint.web.exception.ForbiddenException;
 import java.util.Objects;
 
 @Component
-public class CommonVisibilityAccessManager implements AccessManager<UserPrincipal, AccessibleEntity> {
+public class CommonVisibilityAccessManager implements AccessManager<Long, AccessibleEntity> {
 
     @Override
-    public void authorize(UserPrincipal user, AccessibleEntity entity) {
-        if (entity.isPrivate() && !Objects.equals(extractUserId(user), entity.getOwnerId())) {
+    public void authorize(Long user, AccessibleEntity entity) {
+        if (entity.isPrivate() && !Objects.equals(user, entity.getOwnerId())) {
             throw new ForbiddenException();
         }
-    }
-
-    private Long extractUserId(UserPrincipal user) {
-        return user == null ? null : user.getId();
     }
 }

@@ -1,21 +1,20 @@
-package ua.tunepoint.audio.model.event.playlist;
+package ua.tunepoint.audio.model.event.audio;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import ua.tunepoint.event.model.DomainEvent;
 
 import java.time.LocalDateTime;
 
 @Data
+@SuperBuilder
 @AllArgsConstructor
-@Builder
 @NoArgsConstructor
-public class PlaylistCreateEvent implements DomainEvent {
+public class BaseAudioEvent implements DomainEvent {
 
-    private Long playlistId;
-    private Long playlistOwnerId;
-
+    private Long audioId;
+    private Long audioOwnerId;
     private LocalDateTime time;
 }

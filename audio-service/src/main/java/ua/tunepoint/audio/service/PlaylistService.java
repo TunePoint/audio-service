@@ -7,7 +7,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.tunepoint.audio.data.entity.AccessibleEntity;
-import ua.tunepoint.audio.data.entity.audio.Audio;
+import ua.tunepoint.audio.data.entity.IdEntity;
+import ua.tunepoint.audio.data.entity.PlaylistAccessibleEntity;
+import ua.tunepoint.audio.data.entity.playlist.ManagerType;
 import ua.tunepoint.audio.data.entity.playlist.Playlist;
 import ua.tunepoint.audio.data.entity.playlist.PlaylistAudio;
 import ua.tunepoint.audio.data.entity.playlist.PlaylistAudioIdentity;
@@ -22,9 +24,11 @@ import ua.tunepoint.audio.model.request.PlaylistPostRequest;
 import ua.tunepoint.audio.model.request.PlaylistUpdateRequest;
 import ua.tunepoint.audio.model.response.domain.Resource;
 import ua.tunepoint.audio.model.response.payload.PlaylistPayload;
-import ua.tunepoint.audio.security.CommonUpdateAccessManager;
 import ua.tunepoint.audio.security.CommonVisibilityAccessManager;
+import ua.tunepoint.audio.security.playlist.PlaylistInteractionAccessManager;
+import ua.tunepoint.audio.security.playlist.PlaylistUpdateAccessManager;
 import ua.tunepoint.audio.service.support.PlaylistSmartMapper;
+import ua.tunepoint.audio.utils.EventUtils;
 import ua.tunepoint.event.starter.publisher.EventPublisher;
 import ua.tunepoint.security.UserPrincipal;
 import ua.tunepoint.web.exception.BadRequestException;
@@ -36,7 +40,12 @@ import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 import static ua.tunepoint.audio.model.event.Domain.PLAYLIST;
-import static ua.tunepoint.audio.utils.EventUtils.toCreateEvent;
+import static ua.tunepoint.audio.utils.EventUtils.toAddedEvent;
+import static ua.tunepoint.audio.utils.EventUtils.toDeletedEvent;
+import static ua.tunepoint.audio.utils.EventUtils.toLikedEvent;
+import static ua.tunepoint.audio.utils.EventUtils.toRemovedEvent;
+import static ua.tunepoint.audio.utils.EventUtils.toUnlikedEvent;
+import static ua.tunepoint.audio.utils.EventUtils.toUpdatedEvent;
 
 @Service
 @RequiredArgsConstructor
@@ -55,11 +64,12 @@ public class PlaylistService {
 
     private final EventPublisher eventPublisher;
 
+    private final PlaylistInteractionAccessManager playlistInteractionAccessManager;
+    private final PlaylistUpdateAccessManager playlistUpdateAccessManager;
     private final CommonVisibilityAccessManager commonVisibilityAccessManager;
-    private final CommonUpdateAccessManager commonUpdateAccessManager;
 
     @Transactional
-    public PlaylistPayload create(PlaylistPostRequest request, UserPrincipal user) {
+    public PlaylistPayload create(PlaylistPostRequest request, ManagerType manager, Long clientId) {
 
         Set<Long> requestAudioIds = request.getAudioIds();
 
@@ -72,7 +82,7 @@ public class PlaylistService {
                 throw new BadRequestException();
             }
 
-            authorizedAudioSet.forEach((audio) -> commonVisibilityAccessManager.authorize(user, audio));
+            authorizedAudioSet.forEach((audio) -> commonVisibilityAccessManager.authorize(clientId, audio));
         }
 
         Resource cover = null;
@@ -81,28 +91,29 @@ public class PlaylistService {
                     .orElseThrow(() -> new BadRequestException("Image with id " + request.getCoverId() + " doesn't exist"));
         }
 
-        Playlist playlist = requestMapper.toEntity(request, user.getId());
-        Playlist savedPlaylist = playlistRepository.save(playlist);
+        var playlist = requestMapper.toEntity(request, manager, clientId);
+        var savedPlaylist = playlistRepository.save(playlist);
 
         Set<PlaylistAudio> playlistAudioSet = authorizedAudioSet.stream()
                 .map(it -> playlistMapper.toPlaylistAudio(savedPlaylist.getId(), it.getId()))
                 .collect(Collectors.toSet());
+
         playlistAudioRepository.saveAll(playlistAudioSet);
 
         var payload = playlistSmartMapper.toPayload(savedPlaylist, cover);
 
         eventPublisher.publish(PLAYLIST.getName(),
-                singletonList(toCreateEvent(savedPlaylist))
+                singletonList(EventUtils.toCreatedEvent(savedPlaylist))
         );
 
         return payload;
     }
 
     @Transactional
-    public PlaylistPayload update(Long playlistId, PlaylistUpdateRequest request, UserPrincipal user) {
+    public PlaylistPayload update(Long playlistId, PlaylistUpdateRequest request, Long clientId) {
         Playlist playlist = findPlaylistRequired(playlistId);
 
-        commonUpdateAccessManager.authorize(user, playlist);
+        playlistUpdateAccessManager.authorize(clientId, playlist);
 
         Resource cover = null;
         if (request.getCoverId() != null) {
@@ -114,14 +125,21 @@ public class PlaylistService {
 
         Playlist savedPlaylist = playlistRepository.save(playlist); // TODO: publish event
 
-        return playlistSmartMapper.toPayload(savedPlaylist, cover);
+        var payload =  playlistSmartMapper.toPayload(savedPlaylist, cover);
+
+        eventPublisher.publish(
+                PLAYLIST.getName(),
+                singletonList(toUpdatedEvent(playlist))
+        );
+
+        return payload;
     }
 
-    public PlaylistPayload findById(Long playlistId, UserPrincipal user) {
+    public PlaylistPayload findById(Long playlistId, Long clientId) {
         var playlist = playlistRepository.findById(playlistId)
                 .orElseThrow(NotFoundException::new);
 
-        commonVisibilityAccessManager.authorize(user, playlist);
+        commonVisibilityAccessManager.authorize(clientId, playlist);
 
         return playlistSmartMapper.toPayload(playlist);
     }
@@ -132,80 +150,139 @@ public class PlaylistService {
     }
 
     @Transactional
-    public void like(Long playlistId, UserPrincipal user) {
-         var playlistAccessible = playlistRepository.findById(playlistId, AccessibleEntity.class)
+    public void like(Long playlistId, Long clientId) {
+         var playlistAccessible = playlistRepository.findById(playlistId, PlaylistAccessibleEntity.class)
                  .orElseThrow(NotFoundException::new);
 
-         commonVisibilityAccessManager.authorize(user, playlistAccessible);
+         playlistInteractionAccessManager.authorize(clientId, playlistAccessible);
+         commonVisibilityAccessManager.authorize(clientId, playlistAccessible);
 
-         var likeIdentity = new PlaylistLikeIdentity(playlistId, user.getId());
+         var likeIdentity = new PlaylistLikeIdentity(playlistId, clientId);
          if (playlistLikeRepository.existsById(likeIdentity)) {
              throw new BadRequestException("Like is already set");
          }
 
          var like = playlistMapper.toLike(likeIdentity);
-         playlistLikeRepository.save(like); // TODO: publish event
+         playlistLikeRepository.save(like);
+
+        eventPublisher.publish(
+                PLAYLIST.getName(),
+                singletonList(toLikedEvent(playlistAccessible, clientId))
+        );
     }
 
     @Transactional
-    public void unlike(Long playlistId, UserPrincipal user) {
-        var playlistAccessible = playlistRepository.findById(playlistId, AccessibleEntity.class)
+    public void unlike(Long playlistId, Long clientId) {
+        var playlistAccessible = playlistRepository.findById(playlistId, PlaylistAccessibleEntity.class)
                 .orElseThrow(NotFoundException::new);
 
-        commonVisibilityAccessManager.authorize(user, playlistAccessible);
+        playlistInteractionAccessManager.authorize(clientId, playlistAccessible);
+        commonVisibilityAccessManager.authorize(clientId, playlistAccessible);
 
-        var likeIdentity = new PlaylistLikeIdentity(playlistId, user.getId());
+        var likeIdentity = new PlaylistLikeIdentity(playlistId, clientId);
         if (!playlistLikeRepository.existsById(likeIdentity)) {
             throw new BadRequestException("Like is not set");
         }
 
-        playlistLikeRepository.deleteById(likeIdentity); // TODO: publish event
+        playlistLikeRepository.deleteById(likeIdentity);
+
+        eventPublisher.publish(
+                PLAYLIST.getName(),
+                singletonList(toUnlikedEvent(playlistAccessible, clientId))
+        );
     }
 
     @Transactional
-    public void delete(Long playlistId, UserPrincipal user) {
-        var playlistAccessible = playlistRepository.findById(playlistId, AccessibleEntity.class)
+    public void delete(Long playlistId, Long clientId) {
+        var playlistAccessible = playlistRepository.findById(playlistId, PlaylistAccessibleEntity.class)
                 .orElseThrow(NotFoundException::new);
 
-        commonUpdateAccessManager.authorize(user, playlistAccessible);
+        playlistUpdateAccessManager.authorize(clientId, playlistAccessible);
 
-        playlistRepository.deleteById(playlistId); // TODO: publish event
+        playlistRepository.deleteById(playlistId);
+
+        eventPublisher.publish(
+                PLAYLIST.getName(),
+                singletonList(toDeletedEvent(playlistAccessible))
+        );
     }
 
     @Transactional
-    public void addAudio(Long playlistId, Long audioId, UserPrincipal user) {
+    public void addAudio(Long playlistId, Long audioId, Long clientId) {
         var id = new PlaylistAudioIdentity(playlistId, audioId);
         if (playlistAudioRepository.existsById(id)) {
             throw new BadRequestException("Audio already in playlist");
         }
 
-        authorizePlaylistUpdate(playlistId, audioId, user);
+        var context = authorizePlaylistUpdate(playlistId, audioId, clientId);
 
-        var entry = playlistMapper.toPlaylistAudio(id);
+        addAudio(playlistId, audioId);
 
-        playlistAudioRepository.save(entry); //TODO: publish event
+        eventPublisher.publish(
+                PLAYLIST.getName(),
+                singletonList(toAddedEvent(context.playlist, context.audio, clientId))
+        );
     }
 
     @Transactional
-    public void removeAudio(Long playlistId, Long audioId, UserPrincipal user) {
+    public void addAudio(Long playlistId, Long audioId) {
+        var entry = playlistMapper.toPlaylistAudio(playlistId, audioId);
+
+        playlistAudioRepository.save(entry);
+    }
+
+    @Transactional
+    public void removeAudio(Long playlistId, Long audioId, Long clientId) {
         var id = new PlaylistAudioIdentity(playlistId, audioId);
         if (!playlistAudioRepository.existsById(id)) {
             throw new BadRequestException("Audio is not in playlist");
         }
 
-        authorizePlaylistUpdate(playlistId, audioId, user);
+        var context = authorizePlaylistUpdate(playlistId, audioId, clientId);
 
-        playlistAudioRepository.deleteById(id); // TODO: publish event
+        playlistAudioRepository.deleteById(id);
+
+        eventPublisher.publish(
+                PLAYLIST.getName(),
+                singletonList(toRemovedEvent(context.playlist, context.audio, clientId))
+        );
     }
 
-    private void authorizePlaylistUpdate(Long playlistId, Long audioId, UserPrincipal user) {
-        var playlistAccessible = playlistRepository.findById(playlistId, AccessibleEntity.class)
+    @Transactional
+    public void removeAudio(Long playlistId, Long audioId) {
+        var id = new PlaylistAudioIdentity(playlistId, audioId);
+
+        playlistAudioRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void addAudio(ManagerType manager, Long audioId, Long clientId) {
+        playlistRepository.findByManagerTypeAndOwnerId(
+                manager, clientId, IdEntity.class
+        ).forEach(
+                it -> addAudio(it.getId(), audioId)
+        );
+    }
+
+    @Transactional
+    public void removeAudio(ManagerType manager, Long audioId, Long clientId) {
+        playlistRepository.findByManagerTypeAndOwnerId(
+                manager, clientId, IdEntity.class
+        ).forEach(
+                it -> removeAudio(it.getId(), audioId)
+        );
+    }
+
+    private PlaylistUpdateContext authorizePlaylistUpdate(Long playlistId, Long audioId, Long clientId) {
+        var playlistAccessible = playlistRepository.findById(playlistId, PlaylistAccessibleEntity.class)
                 .orElseThrow(NotFoundException::new);
-        commonUpdateAccessManager.authorize(user, playlistAccessible);
+        playlistUpdateAccessManager.authorize(clientId, playlistAccessible);
 
         var audioAccessible = audioRepository.findById(audioId, AccessibleEntity.class)
                 .orElseThrow(NotFoundException::new);
-        commonVisibilityAccessManager.authorize(user, audioAccessible);
+        commonVisibilityAccessManager.authorize(clientId, audioAccessible);
+
+        return new PlaylistUpdateContext(playlistAccessible, audioAccessible);
     }
 
     private Playlist findPlaylistRequired(Long id) {
@@ -213,8 +290,5 @@ public class PlaylistService {
                 .orElseThrow(() -> new NotFoundException("Playlist with id " + id + " was not found"));
     }
 
-    private Audio findAudioRequired(Long id) {
-        return audioRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("Audio with id " + id + " was not found"));
-    }
+    private static record PlaylistUpdateContext(PlaylistAccessibleEntity playlist, AccessibleEntity audio) { }
 }

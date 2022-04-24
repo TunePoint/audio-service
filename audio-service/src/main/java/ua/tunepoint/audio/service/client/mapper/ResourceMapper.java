@@ -13,5 +13,5 @@ public interface ResourceMapper {
 
     Resource toPayload(ImageResourcePayload image);
 
-    Resource toLocalResource(ua.tunepoint.model.response.domain.Resource resource);
+    Resource toLocalResource(ua.tunepoint.account.model.response.domain.Resource resource);
 }
