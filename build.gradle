@@ -6,8 +6,8 @@ plugins {
 }
 
 allprojects {
-    group = 'ua.tunepoint.account'
-    version = '0.0.2'
+    group = 'ua.tunepoint'
+    version = '0.0.3'
 }
 
 subprojects {
