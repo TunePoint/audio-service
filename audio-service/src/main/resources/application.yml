@@ -20,9 +20,6 @@ event:
   bootstrap-servers: localhost:9092
   service-name: ${spring.application.name:audio-service}
 
-security:
-  secret: secret
-
 eureka:
   client:
     register-with-eureka: true
