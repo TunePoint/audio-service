@@ -22,7 +22,7 @@ public class UserService {
 
     @CircuitBreaker(name = "user-service")
     public Optional<User> findUser(Long id) {
-        var response = userClient.getProfile(id);
+        var response = userClient.findUser(id);
         if (response == null || response.getBody() == null || response.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
             MDC.put("Id", Long.toString(id));
             log.warn("user was not found");
@@ -30,6 +30,10 @@ public class UserService {
             return Optional.empty();
         }
 
-        return Optional.ofNullable(userMapper.toUser(response.getBody().getPayload()));
+        return Optional.ofNullable(
+                userMapper.toUser(
+                        response.getBody().getPayload()
+                )
+        );
     }
 }

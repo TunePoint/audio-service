@@ -1,5 +1,6 @@
 package ua.tunepoint.audio.data.entity.audio;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -9,8 +10,9 @@ import java.io.Serializable;
 
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
 @Embeddable
-public class AudioListeningIdentity implements Serializable {
+public class AudioListeningId implements Serializable {
 
     @Column(name = "user_id")
     private Long userId;
