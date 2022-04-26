@@ -50,10 +50,12 @@ CREATE TABLE audio.audio_likes
 
 CREATE TABLE audio.audio_listening
 (
-    id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     audio_id INTEGER REFERENCES audio.audio(id),
-    listening_time TIMESTAMP
+    listening_count INTEGER NOT NULL DEFAULT 0,
+    last_listening_time TIMESTAMP,
+
+    CONSTRAINT audio_listening_pk PRIMARY KEY(user_id, audio_id)
 );
 
 CREATE TABLE audio.comments
@@ -212,6 +214,15 @@ END $$ LANGUAGE plpgsql;
 CREATE TRIGGER audio_listened AFTER INSERT ON audio.audio_listening
     FOR EACH ROW EXECUTE procedure update_audio_stats_listening();
 
+CREATE FUNCTION update_audio_stats_listening_when_repeat() RETURNS trigger AS $$
+BEGIN
+    UPDATE audio.audio_stats SET listening_count = audio_stats.listening_count + (new.listening_count - old.listening_count) WHERE id = new.audio_id;
+    RETURN new;
+END $$ LANGUAGE plpgsql;
+
+CREATE TRIGGER audio_listened_repeat AFTER UPDATE ON audio.audio_listening
+    FOR EACH ROW EXECUTE procedure update_audio_stats_listening_when_repeat();
+
 --- AUDIO COMMENT TRIGGERS
 
 CREATE FUNCTION create_comment_stats() RETURNS trigger AS $$
@@ -269,3 +280,20 @@ END $$ LANGUAGE plpgsql;
 
 CREATE TRIGGER comment_delete AFTER DELETE ON audio.comments
     FOR EACH ROW EXECUTE procedure update_audio_stats_comment_delete();
+
+-- drop function update_audio_stats_comment_delete;
+-- drop function update_audio_stats_comment_insert;
+-- drop function update_comment_stats_reply;
+-- drop function update_comment_stats_unlike;
+-- drop function update_comment_stats_like;
+-- drop function create_comment_stats;
+-- drop function update_audio_stats_listening_when_repeat;
+-- drop function update_audio_stats_listening;
+-- drop function update_audio_stats_unlike;
+-- drop function update_audio_stats_like;
+-- drop function create_audio_stats;
+-- drop function update_playlist_stats_audio_remove;
+-- drop function update_playlist_stats_audio_add;
+-- drop function update_playlist_stats_unlike;
+-- drop function update_playlist_stats_like;
+-- drop function create_playlist_stats;

@@ -24,6 +24,7 @@ import ua.tunepoint.audio.model.response.AudioPostResponse;
 import ua.tunepoint.audio.model.response.AudioUpdateResponse;
 import ua.tunepoint.audio.model.response.payload.AudioPayload;
 import ua.tunepoint.audio.service.AudioService;
+import ua.tunepoint.audio.service.ListeningService;
 import ua.tunepoint.security.UserPrincipal;
 import ua.tunepoint.web.exception.BadRequestException;
 import ua.tunepoint.web.model.StatusResponse;
@@ -36,6 +37,7 @@ import static ua.tunepoint.audio.utils.UserUtils.extractId;
 public class AudioController {
 
     private final AudioService audioService;
+    private final ListeningService listeningService;
 
     @GetMapping("/{id}")
     public ResponseEntity<AudioGetResponse> getAudio(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal user) {
@@ -43,6 +45,16 @@ public class AudioController {
         var response = AudioGetResponse.builder().payload(payload).build();
 
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/listenings")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<StatusResponse> recordListening(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal user) {
+        listeningService.recordListening(id, extractId(user));
+
+        return ResponseEntity.ok(
+                StatusResponse.builder().build()
+        );
     }
 
     @GetMapping(params = {"searchBy", "id"})
