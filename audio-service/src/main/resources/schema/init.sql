@@ -22,7 +22,8 @@ CREATE TABLE audio.audio
     duration_sec INTEGER,
     is_private BOOLEAN DEFAULT false,
     is_deleted BOOLEAN DEFAULT false,
-    release_type INTEGER
+    release_type INTEGER,
+    audio_type INTEGER
 );
 
 CREATE TABLE audio.audio_genres

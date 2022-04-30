@@ -18,6 +18,7 @@ public class AudioPayload {
     private String description;
     private Integer durationSec;
     private Boolean isPrivate;
+    private String type;
     private Long likeCount = 0L;
     private Long listeningCount = 0L;
     private Long commentCount = 0L;

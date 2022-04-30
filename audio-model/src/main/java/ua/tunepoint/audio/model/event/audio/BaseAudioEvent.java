@@ -16,5 +16,6 @@ public class BaseAudioEvent implements DomainEvent {
 
     private Long audioId;
     private Long audioOwnerId;
+    private String type;
     private LocalDateTime time;
 }

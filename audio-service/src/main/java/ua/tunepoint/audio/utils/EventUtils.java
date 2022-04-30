@@ -34,6 +34,7 @@ public class EventUtils {
         return AudioCreateEvent.builder()
                 .audioId(audio.getId())
                 .audioOwnerId(userId)
+                .type(audio.getType().toString())
                 .time(LocalDateTime.now())
                 .build();
     }
@@ -43,6 +44,7 @@ public class EventUtils {
                 .audioOwnerId(audio.getOwnerId())
                 .audioId(audio.getId())
                 .userId(userId)
+                .type(audio.getType().toString())
                 .time(LocalDateTime.now())
                 .build();
     }
@@ -52,6 +54,7 @@ public class EventUtils {
                 .audioOwnerId(audio.getOwnerId())
                 .audioId(audio.getId())
                 .userId(userId)
+                .type(audio.getType().toString())
                 .time(LocalDateTime.now())
                 .build();
     }

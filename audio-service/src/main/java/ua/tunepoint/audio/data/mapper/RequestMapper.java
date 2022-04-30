@@ -5,14 +5,17 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Mappings;
+import org.mapstruct.Named;
 import ua.tunepoint.audio.data.entity.Genre;
 import ua.tunepoint.audio.data.entity.audio.Audio;
+import ua.tunepoint.audio.data.entity.audio.type.AudioType;
 import ua.tunepoint.audio.data.entity.comment.Comment;
 import ua.tunepoint.audio.data.entity.playlist.ManagerType;
 import ua.tunepoint.audio.data.entity.playlist.Playlist;
 import ua.tunepoint.audio.model.request.AudioCommentPostRequest;
 import ua.tunepoint.audio.model.request.AudioPostRequest;
 import ua.tunepoint.audio.model.request.PlaylistPostRequest;
+import ua.tunepoint.audio.model.request.RequestAudioType;
 
 import java.util.Set;
 
@@ -27,9 +30,17 @@ public interface RequestMapper {
             @Mapping(target = "contentId", source = "request.contentId"),
             @Mapping(target = "coverId", source = "request.coverId"),
             @Mapping(target = "ownerId", source = "userId"),
-            @Mapping(target = "genres", source = " genres")
+            @Mapping(target = "genres", source = "genres"),
+            @Mapping(target = "type", source = "request.type")
     })
     Audio toEntity(AudioPostRequest request, Set<Genre> genres, Long userId);
+
+    default AudioType toAudioType(RequestAudioType requestType) {
+        if (requestType == null) {
+            return null;
+        }
+        return AudioType.withName(requestType.toString());
+    }
 
     void mergeEntity(@MappingTarget Audio entity, AudioPostRequest request);
 

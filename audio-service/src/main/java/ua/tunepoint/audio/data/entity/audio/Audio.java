@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import ua.tunepoint.audio.data.entity.AccessibleEntity;
 import ua.tunepoint.audio.data.entity.Genre;
 import ua.tunepoint.audio.data.entity.audio.converter.ReleaseTypeConverter;
+import ua.tunepoint.audio.data.entity.audio.type.AudioReleaseType;
+import ua.tunepoint.audio.data.entity.audio.type.AudioType;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -67,6 +69,9 @@ public class Audio implements AccessibleEntity {
     @Column(name = "release_type")
     @Convert(converter = ReleaseTypeConverter.class)
     private AudioReleaseType releaseType;
+
+    @Column(name = "audio_type")
+    private AudioType type;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

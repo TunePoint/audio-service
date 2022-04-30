@@ -6,6 +6,7 @@ import org.mapstruct.Mappings;
 import ua.tunepoint.audio.data.entity.audio.Audio;
 import ua.tunepoint.audio.data.entity.audio.AudioLike;
 import ua.tunepoint.audio.data.entity.audio.AudioLikeIdentity;
+import ua.tunepoint.audio.data.entity.audio.type.AudioType;
 import ua.tunepoint.audio.model.response.domain.Resource;
 import ua.tunepoint.audio.model.response.domain.User;
 import ua.tunepoint.audio.model.response.payload.AudioPayload;
@@ -31,9 +32,14 @@ public interface AudioMapper {
             @Mapping(target = "uploadedTime", source = "audio.uploadedTime"),
             @Mapping(target = "genres", source = "audio.genres"),
             @Mapping(target = "cover", source = "cover"),
-            @Mapping(target = "owner", source = "owner")
+            @Mapping(target = "owner", source = "owner"),
+            @Mapping(target = "type", source = "audio.type")
     })
     AudioPayload toPayload(Audio audio, Resource content, Resource cover, User owner);
+
+    default String typeToString(AudioType type) {
+        return type == null ? null : type.toString();
+    }
 
     @Mappings({
             @Mapping(target = "audioId", source = "audioId"),
