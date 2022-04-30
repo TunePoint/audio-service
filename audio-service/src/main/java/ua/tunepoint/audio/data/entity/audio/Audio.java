@@ -6,6 +6,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import ua.tunepoint.audio.data.entity.AccessibleEntity;
 import ua.tunepoint.audio.data.entity.Genre;
+import ua.tunepoint.audio.data.entity.Tag;
 import ua.tunepoint.audio.data.entity.audio.converter.ReleaseTypeConverter;
 import ua.tunepoint.audio.data.entity.audio.type.AudioReleaseType;
 import ua.tunepoint.audio.data.entity.audio.type.AudioType;
@@ -80,6 +81,14 @@ public class Audio implements AccessibleEntity {
             inverseJoinColumns = @JoinColumn(name = "genre_id")
     )
     private Set<Genre> genres;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "audio_tags",
+            joinColumns = @JoinColumn(name = "audio_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private Set<Tag> tags;
 
     @OneToOne(mappedBy = "audio", fetch = FetchType.EAGER)
     private AudioStatistics statistics;

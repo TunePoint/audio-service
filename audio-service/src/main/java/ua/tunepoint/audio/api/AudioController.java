@@ -107,25 +107,47 @@ public class AudioController {
         return ResponseEntity.ok(StatusResponse.builder().build());
     }
 
-    @PostMapping("/{userId}/genres")
+    @PostMapping("/{audioId}/genres")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<StatusResponse> addGenre(
-            @PathVariable Long userId,
+            @PathVariable Long audioId,
             @RequestParam("genreId") Long genreId,
             @AuthenticationPrincipal UserPrincipal user) {
 
-        audioService.addGenre(userId, genreId, extractId(user));
+        audioService.addGenre(audioId, genreId, extractId(user));
         return ResponseEntity.ok(StatusResponse.builder().build());
     }
 
-    @DeleteMapping("/{userId}/genres")
+    @DeleteMapping("/{audioId}/genres")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<StatusResponse> removeGenre(
-            @PathVariable Long userId,
+            @PathVariable Long audioId,
             @RequestParam("genreId") Long genreId,
             @AuthenticationPrincipal UserPrincipal user) {
 
-        audioService.removeGenre(userId, genreId, extractId(user));
+        audioService.removeGenre(audioId, genreId, extractId(user));
+        return ResponseEntity.ok(StatusResponse.builder().build());
+    }
+
+    @PostMapping("/{audioId}/tags")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<StatusResponse> addTag(
+            @PathVariable Long audioId,
+            @RequestParam("tagId") Long tagId,
+            @AuthenticationPrincipal UserPrincipal user
+    ) {
+        audioService.addTag(audioId, tagId, extractId(user));
+        return ResponseEntity.ok(StatusResponse.builder().build());
+    }
+
+    @DeleteMapping("/{audioId}/tags")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<StatusResponse> removeTag(
+            @PathVariable Long audioId,
+            @RequestParam("tagId") Long tagId,
+            @AuthenticationPrincipal UserPrincipal user
+    ) {
+        audioService.removeTag(audioId, tagId, extractId(user));
         return ResponseEntity.ok(StatusResponse.builder().build());
     }
 }

@@ -5,6 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import ua.tunepoint.audio.data.entity.Genre;
 import ua.tunepoint.audio.data.entity.PlaylistAccessibleEntity;
+import ua.tunepoint.audio.data.entity.Tag;
 import ua.tunepoint.audio.data.entity.playlist.converter.ManagerTypeConverter;
 
 import javax.persistence.Column;
@@ -64,6 +65,14 @@ public class Playlist implements PlaylistAccessibleEntity {
             inverseJoinColumns = @JoinColumn(name = "genre_id")
     )
     private Set<Genre> genres;
+
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "playlists_tags",
+            joinColumns = @JoinColumn(name = "playlist_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private Set<Tag> tags;
 
     @OneToOne(fetch = FetchType.EAGER, mappedBy = "playlist")
     private PlaylistStatistics statistics;

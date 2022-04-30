@@ -7,8 +7,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.tunepoint.audio.data.entity.AccessibleEntity;
+import ua.tunepoint.audio.data.entity.Genre;
 import ua.tunepoint.audio.data.entity.IdEntity;
 import ua.tunepoint.audio.data.entity.PlaylistAccessibleEntity;
+import ua.tunepoint.audio.data.entity.Tag;
 import ua.tunepoint.audio.data.entity.playlist.ManagerType;
 import ua.tunepoint.audio.data.entity.playlist.Playlist;
 import ua.tunepoint.audio.data.entity.playlist.PlaylistAudio;
@@ -17,9 +19,11 @@ import ua.tunepoint.audio.data.entity.playlist.PlaylistLikeIdentity;
 import ua.tunepoint.audio.data.mapper.PlaylistMapper;
 import ua.tunepoint.audio.data.mapper.RequestMapper;
 import ua.tunepoint.audio.data.repository.AudioRepository;
+import ua.tunepoint.audio.data.repository.GenreRepository;
 import ua.tunepoint.audio.data.repository.PlaylistAudioRepository;
 import ua.tunepoint.audio.data.repository.PlaylistLikeRepository;
 import ua.tunepoint.audio.data.repository.PlaylistRepository;
+import ua.tunepoint.audio.data.repository.TagRepository;
 import ua.tunepoint.audio.model.request.PlaylistPostRequest;
 import ua.tunepoint.audio.model.request.PlaylistUpdateRequest;
 import ua.tunepoint.audio.model.response.domain.Resource;
@@ -55,6 +59,7 @@ public class PlaylistService {
     private final PlaylistRepository playlistRepository;
     private final PlaylistLikeRepository playlistLikeRepository;
     private final PlaylistAudioRepository playlistAudioRepository;
+    private final TagRepository tagRepository;
 
     private final ResourceService resourceService;
 
@@ -67,6 +72,7 @@ public class PlaylistService {
     private final PlaylistInteractionAccessManager playlistInteractionAccessManager;
     private final PlaylistUpdateAccessManager playlistUpdateAccessManager;
     private final CommonVisibilityAccessManager commonVisibilityAccessManager;
+    private final GenreRepository genreRepository;
 
     @Transactional
     public PlaylistPayload create(PlaylistPostRequest request, ManagerType manager, Long clientId) {
@@ -273,6 +279,79 @@ public class PlaylistService {
         );
     }
 
+    @Transactional
+    public void addTag(Long playlistId, Long tagId, Long clientId) {
+        var context = playlistTagContext(playlistId, tagId);
+        playlistUpdateAccessManager.authorize(clientId, context.playlist);
+
+        var added = context.playlist.getTags().add(context.tag);
+        if (!added) {
+            throw new BadRequestException("tag was already added");
+        }
+    }
+
+    @Transactional
+    public void removeTag(Long playlistId, Long tagId, Long clientId) {
+        var context = playlistTagContext(playlistId, tagId);
+        playlistUpdateAccessManager.authorize(clientId, context.playlist);
+
+        var removed = context.playlist.getTags().remove(context.tag);
+        if (!removed) {
+            throw new BadRequestException("tag was already removed");
+        }
+    }
+
+    @Transactional
+    public void addGenre(Long playlistId, Long genreId, Long clientId) {
+        var context = playlistGenreContext(playlistId, genreId);
+        playlistUpdateAccessManager.authorize(clientId, context.playlist);
+
+        var added = context.playlist.getGenres().add(context.genre);
+        if (!added) {
+            throw new BadRequestException("tag was already added");
+        }
+    }
+
+    @Transactional
+    public void removeGenre(Long playlistId, Long genreId, Long clientId) {
+        var context = playlistGenreContext(playlistId, genreId);
+        playlistUpdateAccessManager.authorize(clientId, context.playlist);
+
+        var removed = context.playlist.getGenres().remove(context.genre);
+        if (!removed) {
+            throw new BadRequestException("tag was already removed");
+        }
+    }
+
+    private PlaylistTagContext playlistTagContext(Long playlistId, Long tagId) {
+        var playlist = playlistRepository.findById(playlistId)
+                .orElseThrow(
+                        () -> new NotFoundException("playlist with id " + playlistId + " was not found")
+                );
+
+        var tag = tagRepository.findById(tagId)
+                .orElseThrow(
+                        () -> new NotFoundException("tag with id " + tagId + " was not found")
+                );
+
+        return new PlaylistTagContext(playlist, tag);
+    }
+
+    private PlaylistGenreContext playlistGenreContext(Long playlistId, Long genreId) {
+        var playlist = playlistRepository.findById(playlistId)
+                .orElseThrow(
+                        () -> new NotFoundException("playlist with id " + playlistId + " was not found")
+                );
+
+        var genre = genreRepository.findById(genreId)
+                .orElseThrow(
+                        () -> new NotFoundException("tag with id " + genreId + " was not found")
+                );
+
+        return new PlaylistGenreContext(playlist, genre);
+    }
+
+
     private PlaylistUpdateContext authorizePlaylistUpdate(Long playlistId, Long audioId, Long clientId) {
         var playlistAccessible = playlistRepository.findById(playlistId, PlaylistAccessibleEntity.class)
                 .orElseThrow(NotFoundException::new);
@@ -291,4 +370,10 @@ public class PlaylistService {
     }
 
     private static record PlaylistUpdateContext(PlaylistAccessibleEntity playlist, AccessibleEntity audio) { }
+
+    private static record PlaylistTagContext(Playlist playlist, Tag tag) {
+    }
+
+    private record PlaylistGenreContext(Playlist playlist, Genre genre) {
+    }
 }

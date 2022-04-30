@@ -9,6 +9,12 @@ CREATE TABLE audio.genres
     name VARCHAR(255)
 );
 
+CREATE TABLE audio.tags
+(
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(64)
+);
+
 CREATE TABLE audio.audio
 (
     id SERIAL PRIMARY KEY,
@@ -132,6 +138,18 @@ CREATE TABLE audio.playlists_genres
     genre_id INTEGER REFERENCES audio.genres(id)
 );
 
+CREATE TABLE audio.audio_tags
+(
+    audio_id BIGINT REFERENCES audio.audio(id) ON DELETE CASCADE,
+    tag_id BIGINT REFERENCES audio.tags(id) ON DELETE CASCADE
+);
+
+CREATE TABLE audio.playlists_tags
+(
+    playlist_id BIGINT REFERENCES audio.playlists(id) ON DELETE CASCADE,
+    tag_id BIGINT REFERENCES audio.tags(id) ON DELETE CASCADE
+);
+
 --- PLAYLIST TRIGGERS
 
 CREATE FUNCTION create_playlist_stats() RETURNS trigger AS $$
@@ -172,7 +190,7 @@ CREATE TRIGGER playlist_audio_added AFTER INSERT ON audio.playlists_audio
 
 CREATE FUNCTION update_playlist_stats_audio_remove() RETURNS trigger AS $$
 BEGIN
-    UPDATE audio.playlists_stats SET audio_count = playlists_stats.audio_count - 1 WHERE id = new.playlist_id;
+    UPDATE audio.playlists_stats SET audio_count = playlists_stats.audio_count - 1 WHERE id = old.playlist_id;
     RETURN new;
 END $$ LANGUAGE plpgsql;
 

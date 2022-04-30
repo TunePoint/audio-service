@@ -90,4 +90,48 @@ public class PlaylistController {
         service.removeAudio(playlistId, audioId, extractId(user));
         return ResponseEntity.ok(StatusResponse.builder().build());
     }
+
+    @PostMapping("/{playlistId}/tags")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<StatusResponse> addTag(
+            @PathVariable Long playlistId,
+            @RequestParam("tagId") Long tagId,
+            @AuthenticationPrincipal UserPrincipal user
+    ) {
+        service.addTag(playlistId, tagId, extractId(user));
+        return ResponseEntity.ok(StatusResponse.builder().build());
+    }
+
+    @DeleteMapping("/{playlistId}/tags")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<StatusResponse> removeTag(
+            @PathVariable Long playlistId,
+            @RequestParam("tagId") Long tagId,
+            @AuthenticationPrincipal UserPrincipal user
+    ) {
+        service.removeTag(playlistId, tagId, extractId(user));
+        return ResponseEntity.ok(StatusResponse.builder().build());
+    }
+
+    @PostMapping("/{playlistId}/genres")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<StatusResponse> addGenre(
+            @PathVariable Long playlistId,
+            @RequestParam("genreId") Long genreId,
+            @AuthenticationPrincipal UserPrincipal user
+    ) {
+        service.addGenre(playlistId, genreId, extractId(user));
+        return ResponseEntity.ok(StatusResponse.builder().build());
+    }
+
+    @DeleteMapping("/{playlistId}/genres")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<StatusResponse> removeGenre(
+            @PathVariable Long playlistId,
+            @RequestParam("genreId") Long genreId,
+            @AuthenticationPrincipal UserPrincipal user
+    ) {
+        service.removeGenre(playlistId, genreId, extractId(user));
+        return ResponseEntity.ok(StatusResponse.builder().build());
+    }
 }

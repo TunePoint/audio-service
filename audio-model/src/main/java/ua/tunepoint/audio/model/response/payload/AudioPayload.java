@@ -26,5 +26,7 @@ public class AudioPayload {
     private Resource cover;
     private Resource content;
     private User owner;
+
     private Set<GenrePayload> genres;
+    private Set<TagPayload> tags;
 }

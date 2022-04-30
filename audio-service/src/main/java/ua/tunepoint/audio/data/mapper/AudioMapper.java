@@ -31,6 +31,7 @@ public interface AudioMapper {
             @Mapping(target = "listeningCount", source = "audio.statistics.listeningCount"),
             @Mapping(target = "uploadedTime", source = "audio.uploadedTime"),
             @Mapping(target = "genres", source = "audio.genres"),
+            @Mapping(target = "tags", source = "audio.tags"),
             @Mapping(target = "cover", source = "cover"),
             @Mapping(target = "owner", source = "owner"),
             @Mapping(target = "type", source = "audio.type")

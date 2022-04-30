@@ -26,7 +26,9 @@ public interface PlaylistMapper {
             @Mapping(target = "cover", source = "cover"),
             @Mapping(target = "owner", source = "owner"),
             @Mapping(target = "likeCount", source = "playlist.statistics.likeCount"),
-            @Mapping(target = "audioCount", source = "playlist.statistics.audioCount")
+            @Mapping(target = "audioCount", source = "playlist.statistics.audioCount"),
+            @Mapping(target = "genres", source = "playlist.genres"),
+            @Mapping(target = "tags", source = "playlist.tags")
     })
     PlaylistPayload toPayload(Playlist playlist, Resource cover, User owner);
 

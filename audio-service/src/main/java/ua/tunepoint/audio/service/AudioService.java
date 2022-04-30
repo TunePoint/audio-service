@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ua.tunepoint.audio.data.entity.AccessibleEntity;
 import ua.tunepoint.audio.data.entity.Genre;
+import ua.tunepoint.audio.data.entity.Tag;
 import ua.tunepoint.audio.data.entity.audio.Audio;
 import ua.tunepoint.audio.data.mapper.AudioMapper;
 import ua.tunepoint.audio.data.mapper.RequestMapper;
@@ -15,6 +16,7 @@ import ua.tunepoint.audio.data.repository.AudioLikeRepository;
 import ua.tunepoint.audio.data.repository.AudioRepository;
 import ua.tunepoint.audio.data.repository.GenreRepository;
 import ua.tunepoint.audio.data.repository.PlaylistRepository;
+import ua.tunepoint.audio.data.repository.TagRepository;
 import ua.tunepoint.audio.model.request.AudioPostRequest;
 import ua.tunepoint.audio.model.response.domain.Resource;
 import ua.tunepoint.audio.model.response.payload.AudioPayload;
@@ -46,6 +48,7 @@ public class AudioService {
     private final AudioLikeRepository audioLikeRepository;
     private final PlaylistRepository playlistRepository;
     private final GenreRepository genreRepository;
+    private final TagRepository tagRepository;
 
     private final ResourceService resourceService;
     private final UserService userService;
@@ -208,6 +211,28 @@ public class AudioService {
         }
     }
 
+    @Transactional
+    public void addTag(Long audioId, Long tagId, Long clientId) {
+        var context = audioTagContext(audioId, tagId);
+        updateAccessManager.authorize(clientId, context.audio);
+
+        boolean added = context.audio.getTags().add(context.tag);
+        if (!added) {
+            throw new BadRequestException("tag already added");
+        }
+    }
+
+    @Transactional
+    public void removeTag(Long audioId, Long tagId, Long clientId) {
+        var context = audioTagContext(audioId, tagId);
+        updateAccessManager.authorize(clientId, context.audio);
+
+        boolean removed = context.audio.getTags().remove(context.tag);
+        if (!removed) {
+            throw new BadRequestException("tag was not present");
+        }
+    }
+
     private AudioGenreContext audioGenreContext(Long audioId, Long genreId) {
         var audio = audioRepository.findById(audioId)
                 .orElseThrow(() -> new NotFoundException("audio with id " + audioId + " was not found"));
@@ -216,6 +241,16 @@ public class AudioService {
                 .orElseThrow(() -> new NotFoundException("genre with id " + genreId + " was not found"));
 
         return new AudioGenreContext(audio, genre);
+    }
+
+    private AudioTagContext audioTagContext(Long audioId, Long tagId) {
+        var audio = audioRepository.findById(audioId)
+                .orElseThrow(() -> new NotFoundException("audio with id " + audioId + " was not found"));
+
+        var tag = tagRepository.findById(tagId)
+                .orElseThrow(() -> new NotFoundException("tag with id " + tagId + " was not found"));
+
+        return new AudioTagContext(audio, tag);
     }
 
     private Resource getImageRequired(String id) {
@@ -229,5 +264,8 @@ public class AudioService {
     }
 
     private record AudioGenreContext(Audio audio, Genre genre) {
+    }
+
+    private record AudioTagContext(Audio audio, Tag tag) {
     }
 }
