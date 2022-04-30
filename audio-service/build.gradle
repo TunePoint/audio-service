@@ -19,6 +19,7 @@ dependencies {
     implementation 'org.liquibase:liquibase-core'
     implementation 'org.mapstruct:mapstruct'
     implementation 'com.auth0:java-jwt'
+    implementation 'com.opencsv:opencsv'
 
     implementation 'ua.tunepoint:commons-event-model'
     implementation 'ua.tunepoint:commons-event-starter'

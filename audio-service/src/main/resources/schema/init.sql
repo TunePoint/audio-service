@@ -5,6 +5,7 @@ CREATE SCHEMA if NOT EXISTS audio;
 CREATE TABLE audio.genres
 (
     id SERIAL PRIMARY KEY,
+    parent_id BIGINT REFERENCES audio.genres(id) NULL,
     name VARCHAR(255)
 );
 
@@ -20,7 +21,8 @@ CREATE TABLE audio.audio
     uploaded_time TIMESTAMP,
     duration_sec INTEGER,
     is_private BOOLEAN DEFAULT false,
-    is_deleted BOOLEAN DEFAULT false
+    is_deleted BOOLEAN DEFAULT false,
+    release_type INTEGER
 );
 
 CREATE TABLE audio.audio_genres

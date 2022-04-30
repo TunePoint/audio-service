@@ -5,7 +5,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.PagingAndSortingRepository;
 import org.springframework.stereotype.Repository;
-import ua.tunepoint.audio.data.entity.AccessibleEntity;
 import ua.tunepoint.audio.data.entity.audio.Audio;
 
 import java.util.Optional;

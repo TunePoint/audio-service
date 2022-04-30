@@ -5,6 +5,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.Mappings;
+import ua.tunepoint.audio.data.entity.Genre;
 import ua.tunepoint.audio.data.entity.audio.Audio;
 import ua.tunepoint.audio.data.entity.comment.Comment;
 import ua.tunepoint.audio.data.entity.playlist.ManagerType;
@@ -26,8 +27,9 @@ public interface RequestMapper {
             @Mapping(target = "contentId", source = "request.contentId"),
             @Mapping(target = "coverId", source = "request.coverId"),
             @Mapping(target = "ownerId", source = "userId"),
+            @Mapping(target = "genres", source = " genres")
     })
-    Audio toEntity(AudioPostRequest request, Long userId);
+    Audio toEntity(AudioPostRequest request, Set<Genre> genres, Long userId);
 
     void mergeEntity(@MappingTarget Audio entity, AudioPostRequest request);
 

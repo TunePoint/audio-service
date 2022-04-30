@@ -6,6 +6,7 @@ import ua.tunepoint.audio.model.response.domain.Resource;
 import ua.tunepoint.audio.model.response.domain.User;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -24,4 +25,5 @@ public class AudioPayload {
     private Resource cover;
     private Resource content;
     private User owner;
+    private Set<GenrePayload> genres;
 }

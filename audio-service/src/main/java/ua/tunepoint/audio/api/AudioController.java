@@ -106,4 +106,26 @@ public class AudioController {
         audioService.unlike(id, extractId(user));
         return ResponseEntity.ok(StatusResponse.builder().build());
     }
+
+    @PostMapping("/{userId}/genres")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<StatusResponse> addGenre(
+            @PathVariable Long userId,
+            @RequestParam("genreId") Long genreId,
+            @AuthenticationPrincipal UserPrincipal user) {
+
+        audioService.addGenre(userId, genreId, extractId(user));
+        return ResponseEntity.ok(StatusResponse.builder().build());
+    }
+
+    @DeleteMapping("/{userId}/genres")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<StatusResponse> removeGenre(
+            @PathVariable Long userId,
+            @RequestParam("genreId") Long genreId,
+            @AuthenticationPrincipal UserPrincipal user) {
+
+        audioService.removeGenre(userId, genreId, extractId(user));
+        return ResponseEntity.ok(StatusResponse.builder().build());
+    }
 }

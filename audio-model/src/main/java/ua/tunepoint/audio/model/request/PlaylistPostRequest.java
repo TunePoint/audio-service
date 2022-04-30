@@ -17,5 +17,6 @@ public class PlaylistPostRequest {
     private String description;
     private Boolean isPrivate = false;
     private Set<Long> audioIds;
+    private Set<Long> genreIds;
     private String coverId;
 }

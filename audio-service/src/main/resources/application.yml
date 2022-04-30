@@ -10,7 +10,6 @@ spring:
     properties:
       hibernate:
         default_schema: audio
-    show-sql: true
   datasource:
     url:
     username:
@@ -19,6 +18,9 @@ spring:
 event:
   bootstrap-servers:
   service-name: ${spring.application.name:audio-service}
+
+domain:
+  genre-source: domain/genres.csv
 
 eureka:
   client:

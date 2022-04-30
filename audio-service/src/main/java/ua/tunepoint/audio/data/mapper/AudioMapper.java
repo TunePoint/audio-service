@@ -10,7 +10,12 @@ import ua.tunepoint.audio.model.response.domain.Resource;
 import ua.tunepoint.audio.model.response.domain.User;
 import ua.tunepoint.audio.model.response.payload.AudioPayload;
 
-@Mapper(componentModel = "spring")
+@Mapper(
+        componentModel = "spring",
+        uses = {
+                GenreMapper.class
+        }
+)
 public interface AudioMapper {
 
     @Mappings({
@@ -24,6 +29,7 @@ public interface AudioMapper {
             @Mapping(target = "likeCount", source = "audio.statistics.likeCount"),
             @Mapping(target = "listeningCount", source = "audio.statistics.listeningCount"),
             @Mapping(target = "uploadedTime", source = "audio.uploadedTime"),
+            @Mapping(target = "genres", source = "audio.genres"),
             @Mapping(target = "cover", source = "cover"),
             @Mapping(target = "owner", source = "owner")
     })

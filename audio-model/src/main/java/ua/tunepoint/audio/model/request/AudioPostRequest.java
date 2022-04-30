@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.Set;
 
 @Data
 @NoArgsConstructor
@@ -29,6 +30,8 @@ public class AudioPostRequest {
 
     @NotNull
     private String coverId;
+
+    private Set<Long> genreIds;
 
     private Boolean isPrivate = false;
 }
