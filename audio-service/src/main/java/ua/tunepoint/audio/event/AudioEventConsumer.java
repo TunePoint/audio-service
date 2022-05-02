@@ -9,13 +9,13 @@ import ua.tunepoint.audio.model.event.audio.AudioLikeEvent;
 import ua.tunepoint.audio.model.event.audio.AudioUnlikeEvent;
 import ua.tunepoint.audio.model.request.PlaylistPostRequest;
 import ua.tunepoint.audio.service.PlaylistService;
-import ua.tunepoint.auth.model.event.user.UserCreatedEvent;
+import ua.tunepoint.auth.model.event.user.UserRegisteredEvent;
 import ua.tunepoint.event.starter.handler.DomainEventHandlers;
 import ua.tunepoint.event.starter.handler.DomainEventHandlersBuilder;
 import ua.tunepoint.event.starter.registry.DomainRegistry;
 
 import static ua.tunepoint.audio.model.event.Domain.AUDIO;
-import static ua.tunepoint.auth.model.event.AuthDomain.USER;
+import static ua.tunepoint.auth.model.event.AuthDomain.AUTH;
 
 @Slf4j
 @Component
@@ -31,8 +31,8 @@ public class AudioEventConsumer {
                 .forDomain(AUDIO.getName())
                 .onEvent(AudioLikeEvent.class, this::handleAudioLike)
                 .onEvent(AudioUnlikeEvent.class, this::handleAudioUnlike)
-                .forDomain(USER.getName())
-                .onEvent(UserCreatedEvent.class, this::handleUserCreated)
+                .forDomain(AUTH.getName())
+                .onEvent(UserRegisteredEvent.class, this::handleUserCreated)
                 .build();
     }
 
@@ -56,7 +56,7 @@ public class AudioEventConsumer {
         );
     }
 
-    private void handleUserCreated(UserCreatedEvent event) {
+    private void handleUserCreated(UserRegisteredEvent event) {
         log.info("Handling user.create event: " + event);
 
         playlistService.create(

@@ -12,7 +12,7 @@ CREATE TABLE audio.genres
 CREATE TABLE audio.tags
 (
     id SERIAL PRIMARY KEY,
-    name VARCHAR(64)
+    name VARCHAR(64) UNIQUE
 );
 
 CREATE TABLE audio.audio

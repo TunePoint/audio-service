@@ -143,11 +143,14 @@ public class EventUtils {
                 .build();
     }
 
-    public static PlaylistCreatedEvent toCreatedEvent(PlaylistAccessibleEntity playlist) {
+    public static PlaylistCreatedEvent toCreatedEvent(Playlist playlist) {
         return PlaylistCreatedEvent.builder()
                 .playlistId(playlist.getId())
                 .playlistOwnerId(playlist.getOwnerId())
                 .time(LocalDateTime.now())
+                .title(playlist.getTitle())
+                .description(playlist.getDescription())
+                .isPrivate(playlist.isPrivate())
                 .build();
     }
 
@@ -157,6 +160,7 @@ public class EventUtils {
                 .playlistOwnerId(playlist.getOwnerId())
                 .title(playlist.getTitle())
                 .description(playlist.getDescription())
+                .isPrivate(playlist.isPrivate())
                 .time(LocalDateTime.now())
                 .build();
     }

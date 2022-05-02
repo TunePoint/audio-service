@@ -6,7 +6,7 @@ import ua.tunepoint.audio.event.AudioEventConsumer;
 import ua.tunepoint.audio.model.event.AudioCommentEventType;
 import ua.tunepoint.audio.model.event.AudioEventType;
 import ua.tunepoint.audio.model.event.PlaylistEventType;
-import ua.tunepoint.auth.model.event.UserEventType;
+import ua.tunepoint.auth.model.event.AuthEventType;
 import ua.tunepoint.event.starter.DomainRelation;
 import ua.tunepoint.event.starter.handler.DomainEventHandlers;
 import ua.tunepoint.event.starter.registry.DomainRegistry;
@@ -17,7 +17,7 @@ import java.util.Set;
 import static ua.tunepoint.audio.model.event.Domain.AUDIO;
 import static ua.tunepoint.audio.model.event.Domain.AUDIO_COMMENT;
 import static ua.tunepoint.audio.model.event.Domain.PLAYLIST;
-import static ua.tunepoint.auth.model.event.AuthDomain.USER;
+import static ua.tunepoint.auth.model.event.AuthDomain.AUTH;
 
 @Configuration
 public class EventConfiguration {
@@ -44,8 +44,8 @@ public class EventConfiguration {
                         Set.of(DomainRelation.PRODUCER)
                 )
                 .register(
-                        USER.getName(),
-                        UserEventType.values(),
+                        AUTH.getName(),
+                        AuthEventType.values(),
                         Set.of(DomainRelation.CONSUMER)
                 )
                 .build();
