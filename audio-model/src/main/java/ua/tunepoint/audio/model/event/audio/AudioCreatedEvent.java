@@ -14,5 +14,10 @@ import java.time.LocalDateTime;
 @SuperBuilder
 @AllArgsConstructor
 @EqualsAndHashCode(callSuper = true)
-public class AudioCreateEvent extends BaseAudioEvent {
+public class AudioCreatedEvent extends BaseAudioEvent {
+
+    private String title;
+    private String description;
+    private String authorPseudonym;
+    private Boolean isPrivate;
 }

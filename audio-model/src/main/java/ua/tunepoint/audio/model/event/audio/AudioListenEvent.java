@@ -14,4 +14,5 @@ import lombok.experimental.SuperBuilder;
 public class AudioListenEvent extends BaseAudioEvent {
 
     private Long userId;
+    private Long playlistId;
 }

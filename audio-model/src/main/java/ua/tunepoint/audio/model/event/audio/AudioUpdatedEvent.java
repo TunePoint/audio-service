@@ -19,6 +19,8 @@ public class AudioUpdatedEvent extends BaseAudioEvent {
 
     private String title;
     private String description;
+    private String authorPseudonym;
+    private Boolean isPrivate;
     private String coverId;
     private String contentId;
 }

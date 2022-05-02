@@ -6,7 +6,7 @@ import ua.tunepoint.audio.data.entity.PlaylistAccessibleEntity;
 import ua.tunepoint.audio.data.entity.audio.Audio;
 import ua.tunepoint.audio.data.entity.comment.Comment;
 import ua.tunepoint.audio.data.entity.playlist.Playlist;
-import ua.tunepoint.audio.model.event.audio.AudioCreateEvent;
+import ua.tunepoint.audio.model.event.audio.AudioCreatedEvent;
 import ua.tunepoint.audio.model.event.audio.AudioDeletedEvent;
 import ua.tunepoint.audio.model.event.audio.AudioLikeEvent;
 import ua.tunepoint.audio.model.event.audio.AudioUnlikeEvent;
@@ -30,11 +30,15 @@ import java.time.LocalDateTime;
 @UtilityClass
 public class EventUtils {
 
-    public static AudioCreateEvent toCreatedEvent(Audio audio, Long userId) {
-        return AudioCreateEvent.builder()
+    public static AudioCreatedEvent toCreatedEvent(Audio audio, Long userId) {
+        return AudioCreatedEvent.builder()
                 .audioId(audio.getId())
                 .audioOwnerId(userId)
                 .type(audio.getType().toString())
+                .description(audio.getDescription())
+                .title(audio.getTitle())
+                .authorPseudonym(audio.getAuthorName())
+                .isPrivate(audio.isPrivate())
                 .time(LocalDateTime.now())
                 .build();
     }
@@ -85,6 +89,8 @@ public class EventUtils {
                 .description(audio.getDescription())
                 .coverId(audio.getCoverId())
                 .contentId(audio.getContentId())
+                .authorPseudonym(audio.getAuthorName())
+                .isPrivate(audio.isPrivate())
                 .time(LocalDateTime.now())
                 .build();
     }
