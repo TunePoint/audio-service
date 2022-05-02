@@ -11,6 +11,7 @@ import ua.tunepoint.event.model.DomainEvent;
 @Data
 @SuperBuilder
 @AllArgsConstructor
+@NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class AudioDeletedEvent extends BaseAudioEvent {
 

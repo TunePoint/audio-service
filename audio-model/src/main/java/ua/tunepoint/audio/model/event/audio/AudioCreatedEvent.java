@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Data
 @SuperBuilder
 @AllArgsConstructor
+@NoArgsConstructor
 @EqualsAndHashCode(callSuper = true)
 public class AudioCreatedEvent extends BaseAudioEvent {
 

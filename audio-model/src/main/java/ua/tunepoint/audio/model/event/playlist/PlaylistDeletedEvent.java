@@ -8,6 +8,7 @@ import lombok.experimental.SuperBuilder;
 
 @Data
 @AllArgsConstructor
+@NoArgsConstructor
 @SuperBuilder
 @EqualsAndHashCode(callSuper = true)
 public class PlaylistDeletedEvent extends BasePlaylistEvent {
