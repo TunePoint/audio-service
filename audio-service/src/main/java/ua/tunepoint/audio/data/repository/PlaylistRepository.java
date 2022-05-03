@@ -10,6 +10,7 @@ import ua.tunepoint.audio.data.entity.playlist.ManagerType;
 import ua.tunepoint.audio.data.entity.playlist.Playlist;
 
 import javax.annotation.Nullable;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -25,4 +26,7 @@ public interface PlaylistRepository extends PagingAndSortingRepository<Playlist,
     Page<Playlist> findByOwnerIdWithAccessControl(Long ownerId, @Nullable Long userId, Pageable pageable);
 
     <T> Set<T> findByManagerTypeAndOwnerId(ManagerType type, Long ownerId, Class<T> projection);
+
+    @Query("SELECT p FROM Playlist p WHERE id IN :ids")
+    List<Playlist> findBulk(List<Long> ids);
 }

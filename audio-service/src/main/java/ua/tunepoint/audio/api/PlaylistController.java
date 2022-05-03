@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ua.tunepoint.audio.data.entity.playlist.ManagerType;
 import ua.tunepoint.audio.model.request.PlaylistPostRequest;
 import ua.tunepoint.audio.model.request.PlaylistUpdateRequest;
+import ua.tunepoint.audio.model.response.PlaylistBulkResponse;
 import ua.tunepoint.audio.model.response.PlaylistGetResponse;
 import ua.tunepoint.audio.model.response.PlaylistPostResponse;
 import ua.tunepoint.audio.model.response.PlaylistUpdateResponse;
@@ -23,6 +24,8 @@ import ua.tunepoint.audio.model.response.payload.PlaylistPayload;
 import ua.tunepoint.audio.service.PlaylistService;
 import ua.tunepoint.security.UserPrincipal;
 import ua.tunepoint.web.model.StatusResponse;
+
+import java.util.List;
 
 import static ua.tunepoint.audio.utils.UserUtils.extractId;
 
@@ -32,6 +35,15 @@ import static ua.tunepoint.audio.utils.UserUtils.extractId;
 public class PlaylistController {
 
     private final PlaylistService service;
+
+    @GetMapping("/_bulk")
+    public ResponseEntity<PlaylistBulkResponse> searchBulk(@RequestParam("ids") List<Long> ids) {
+        return ResponseEntity.ok(
+                PlaylistBulkResponse.builder()
+                        .payload(service.searchBulk(ids))
+                        .build()
+        );
+    }
 
     @PostMapping
     @PreAuthorize("isAuthenticated()")

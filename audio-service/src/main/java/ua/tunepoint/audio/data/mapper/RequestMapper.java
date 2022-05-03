@@ -23,7 +23,7 @@ import java.util.Set;
 public interface RequestMapper {
 
     @Mappings({
-            @Mapping(target = "authorName", source = "request.authorName"),
+            @Mapping(target = "authorName", source = "request.authorPseudonym"),
             @Mapping(target = "title", source = "request.title"),
             @Mapping(target = "description", source = "request.description"),
             @Mapping(target = "isPrivate", source = "request.isPrivate"),

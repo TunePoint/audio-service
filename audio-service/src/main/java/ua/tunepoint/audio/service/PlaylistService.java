@@ -39,6 +39,7 @@ import ua.tunepoint.web.exception.BadRequestException;
 import ua.tunepoint.web.exception.NotFoundException;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -367,6 +368,12 @@ public class PlaylistService {
     private Playlist findPlaylistRequired(Long id) {
         return playlistRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Playlist with id " + id + " was not found"));
+    }
+
+    public List<PlaylistPayload> searchBulk(List<Long> ids) {
+        return playlistRepository.findBulk(ids)
+                .stream().map(playlistSmartMapper::toPayload)
+                .collect(Collectors.toList());
     }
 
     private static record PlaylistUpdateContext(PlaylistAccessibleEntity playlist, AccessibleEntity audio) { }

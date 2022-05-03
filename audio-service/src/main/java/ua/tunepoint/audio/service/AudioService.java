@@ -31,6 +31,7 @@ import ua.tunepoint.web.exception.NotFoundException;
 
 import javax.annotation.Nullable;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
@@ -94,6 +95,12 @@ public class AudioService {
                 singletonList(EventUtils.toCreatedEvent(audio, user))
         );
         return payload;
+    }
+
+    public List<AudioPayload> searchBulk(List<Long> ids) {
+        final var bulk = audioRepository.findBulk(ids);
+        return bulk.stream().map(audioSmartMapper::toPayload)
+                .collect(Collectors.toList());
     }
 
     public Page<AudioPayload> findByOwner(@NotNull Long ownerId, @Nullable Long currentUser, Pageable pageable) {

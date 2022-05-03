@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.tunepoint.audio.model.request.AudioPostRequest;
+import ua.tunepoint.audio.model.response.AudioBulkResponse;
 import ua.tunepoint.audio.model.response.AudioGetResponse;
 import ua.tunepoint.audio.model.response.AudioListGetResponse;
 import ua.tunepoint.audio.model.response.AudioPostResponse;
@@ -29,6 +30,8 @@ import ua.tunepoint.security.UserPrincipal;
 import ua.tunepoint.web.exception.BadRequestException;
 import ua.tunepoint.web.model.StatusResponse;
 
+import java.util.List;
+
 import static ua.tunepoint.audio.utils.UserUtils.extractId;
 
 @RestController
@@ -38,6 +41,15 @@ public class AudioController {
 
     private final AudioService audioService;
     private final ListeningService listeningService;
+
+    @GetMapping("/_bulk")
+    public ResponseEntity<AudioBulkResponse> getBulk(@RequestParam("ids") List<Long> ids) {
+        return ResponseEntity.ok(
+            AudioBulkResponse.builder()
+                    .payload(audioService.searchBulk(ids))
+                    .build()
+        );
+    }
 
     @GetMapping("/{id}")
     public ResponseEntity<AudioGetResponse> getAudio(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal user) {

@@ -16,7 +16,7 @@ public class AudioPostRequest {
 
     @NotNull
     @NotBlank
-    private String authorName;
+    private String authorPseudonym;
 
     @NotNull
     @Size(min = 3, max = 255)

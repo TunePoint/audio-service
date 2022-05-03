@@ -13,7 +13,7 @@ import java.util.Set;
 public class AudioPayload {
 
     private Long id;
-    private String authorName;
+    private String authorPseudonym;
     private String title;
     private String description;
     private Integer durationSec;

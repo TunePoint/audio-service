@@ -21,7 +21,7 @@ public interface AudioMapper {
 
     @Mappings({
             @Mapping(target = "id", source = "audio.id"),
-            @Mapping(target = "authorName", source = "audio.authorName"),
+            @Mapping(target = "authorPseudonym", source = "audio.authorName"),
             @Mapping(target = "title", source = "audio.title"),
             @Mapping(target = "description", source = "audio.description"),
             @Mapping(target = "durationSec", source = "audio.durationSec"),
