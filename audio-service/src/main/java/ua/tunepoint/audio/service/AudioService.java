@@ -31,6 +31,7 @@ import ua.tunepoint.web.exception.NotFoundException;
 
 import javax.annotation.Nullable;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -100,6 +101,7 @@ public class AudioService {
     public List<AudioPayload> searchBulk(List<Long> ids) {
         final var bulk = audioRepository.findBulk(ids);
         return bulk.stream().map(audioSmartMapper::toPayload)
+                .sorted(Comparator.comparing(it -> ids.indexOf(it.getId())))
                 .collect(Collectors.toList());
     }
 

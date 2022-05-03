@@ -38,6 +38,7 @@ import ua.tunepoint.security.UserPrincipal;
 import ua.tunepoint.web.exception.BadRequestException;
 import ua.tunepoint.web.exception.NotFoundException;
 
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -373,6 +374,7 @@ public class PlaylistService {
     public List<PlaylistPayload> searchBulk(List<Long> ids) {
         return playlistRepository.findBulk(ids)
                 .stream().map(playlistSmartMapper::toPayload)
+                .sorted(Comparator.comparing(it -> ids.indexOf(it.getId())))
                 .collect(Collectors.toList());
     }
 
