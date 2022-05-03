@@ -7,7 +7,7 @@ plugins {
 
 allprojects {
     group = 'ua.tunepoint'
-    version = '0.0.11'
+    version = '0.0.12'
 }
 
 subprojects {
@@ -66,8 +66,8 @@ subprojects {
             dependency 'com.opencsv:opencsv:5.6'
 
             dependency 'ua.tunepoint:commons-security:0.0.3'
-            dependency 'ua.tunepoint:resource-api:0.0.4'
-            dependency 'ua.tunepoint:resource-model:0.0.4'
+            dependency 'ua.tunepoint:resource-api:0.0.6'
+            dependency 'ua.tunepoint:resource-model:0.0.6'
             dependency 'ua.tunepoint:account-api:0.0.10'
             dependency 'ua.tunepoint:account-model:0.0.10'
             dependency 'ua.tunepoint:auth-model:0.0.9'
