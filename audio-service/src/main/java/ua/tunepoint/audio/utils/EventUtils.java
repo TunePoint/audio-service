@@ -35,6 +35,7 @@ public class EventUtils {
                 .audioId(audio.getId())
                 .audioOwnerId(userId)
                 .type(audio.getType().toString())
+                .authorPseudonym(audio.getAuthorName())
                 .description(audio.getDescription())
                 .title(audio.getTitle())
                 .authorPseudonym(audio.getAuthorName())

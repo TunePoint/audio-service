@@ -11,12 +11,12 @@ spring:
       hibernate:
         default_schema: audio
   datasource:
-    url:
-    username:
-    password:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
 
 event:
-  bootstrap-servers:
+  bootstrap-servers: ${KAFKA_URL}
   service-name: ${spring.application.name:audio-service}
 
 domain:
@@ -27,4 +27,4 @@ eureka:
     register-with-eureka: true
     fetch-registry: true
     service-url:
-      defaultZone: http://localhost:8765/eureka
+      defaultZone: ${EUREKA_URL:http://localhost:8765/eureka}
