@@ -7,6 +7,7 @@ import ua.tunepoint.audio.data.entity.Genre;
 import ua.tunepoint.audio.data.entity.PlaylistAccessibleEntity;
 import ua.tunepoint.audio.data.entity.Tag;
 import ua.tunepoint.audio.data.entity.playlist.converter.ManagerTypeConverter;
+import ua.tunepoint.audio.data.entity.playlist.converter.PlaylistTypeConverter;
 
 import javax.persistence.Column;
 import javax.persistence.Convert;
@@ -20,7 +21,9 @@ import javax.persistence.JoinTable;
 import javax.persistence.ManyToMany;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
+import javax.persistence.PrePersist;
 import javax.persistence.Table;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Data
@@ -51,8 +54,15 @@ public class Playlist implements PlaylistAccessibleEntity {
     @Convert(converter = ManagerTypeConverter.class)
     private ManagerType managerType;
 
+    @Column(name = "type")
+    @Convert(converter = PlaylistTypeConverter.class)
+    private PlaylistType type;
+
     @Column(name = "cover_id")
     private String coverId;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
 
     @OneToMany
     @JoinColumn(name = "playlist_id")
@@ -76,4 +86,9 @@ public class Playlist implements PlaylistAccessibleEntity {
 
     @OneToOne(fetch = FetchType.EAGER, mappedBy = "playlist")
     private PlaylistStatistics statistics;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+    }
 }

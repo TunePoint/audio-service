@@ -11,6 +11,8 @@ import ua.tunepoint.audio.service.ResourceService;
 import ua.tunepoint.audio.service.UserService;
 import ua.tunepoint.web.exception.NotFoundException;
 
+import java.util.Set;
+
 @Component
 @RequiredArgsConstructor
 public class PlaylistSmartMapper {
@@ -19,15 +21,26 @@ public class PlaylistSmartMapper {
     private final ResourceService resourceService;
     private final PlaylistMapper playlistMapper;
 
-    public PlaylistPayload toPayload(Playlist playlist, Resource cover) {
+    public PlaylistPayload toPayload(Playlist playlist, Resource cover, Boolean isLiked) {
 
         User user = userService.findUser(playlist.getOwnerId())
                 .orElseThrow(() -> new NotFoundException("User with id " + playlist.getOwnerId() + " was not found"));
 
-        return playlistMapper.toPayload(playlist, cover, user);
+        return playlistMapper.toPayload(playlist, cover, user, isLiked);
     }
 
-    public PlaylistPayload toPayload(Playlist playlist) {
+    public PlaylistPayload toPayload(Playlist playlist, User user, Boolean isLiked) {
+
+        Resource cover = null;
+        if (playlist.getCoverId() != null) {
+            cover = resourceService.getImage(playlist.getCoverId())
+                    .orElseThrow(() -> new NotFoundException("Image with id " + playlist.getCoverId() + " was not found" ));
+        }
+
+        return playlistMapper.toPayload(playlist, cover, user, isLiked);
+    }
+
+    public PlaylistPayload toPayload(Playlist playlist, Boolean isLiked) {
 
         Resource cover = null;
         if (playlist.getCoverId() != null) {
@@ -38,6 +51,6 @@ public class PlaylistSmartMapper {
         User user = userService.findUser(playlist.getOwnerId())
                 .orElseThrow(() -> new NotFoundException("User with id " + playlist.getOwnerId() + " was not found"));
 
-        return playlistMapper.toPayload(playlist, cover, user);
+        return playlistMapper.toPayload(playlist, cover, user, isLiked);
     }
 }

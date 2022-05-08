@@ -6,7 +6,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ua.tunepoint.audio.data.entity.AccessibleEntity;
 import ua.tunepoint.audio.data.entity.Genre;
 import ua.tunepoint.audio.data.entity.Tag;
 import ua.tunepoint.audio.data.entity.audio.Audio;
@@ -30,14 +29,13 @@ import ua.tunepoint.web.exception.BadRequestException;
 import ua.tunepoint.web.exception.NotFoundException;
 
 import javax.annotation.Nullable;
-
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.singletonList;
 import static ua.tunepoint.audio.model.event.Domain.AUDIO;
-import static ua.tunepoint.audio.utils.EventUtils.toCreatedEvent;
 import static ua.tunepoint.audio.utils.EventUtils.toLikeEvent;
 import static ua.tunepoint.audio.utils.EventUtils.toUnlikeEvent;
 import static ua.tunepoint.audio.utils.EventUtils.toUpdatedEvent;
@@ -54,6 +52,7 @@ public class AudioService {
 
     private final ResourceService resourceService;
     private final UserService userService;
+    private final AudioLikeService audioLikeService;
 
     private final RequestMapper requestMapper;
     private final AudioMapper audioMapper;
@@ -65,19 +64,12 @@ public class AudioService {
 
     private final EventPublisher publisher;
 
-    // 1. resource-service call for audio
-    // 2. resource-service call for image
-    // 3. request-model mapping
-    // 4. save to db
-    // 5. account-service call
-    // 6. model-payload mapping
-    // 7. publishing audio.created event
-    // the method does a lot of work. should think about how it can be split
     @Transactional
-    public AudioPayload save(AudioPostRequest request, @NotNull Long user) {
-
-        var content = getAudioRequired(request.getContentId());
-        var cover = getImageRequired(request.getCoverId());
+    public Long save(AudioPostRequest request, @NotNull Long user) {
+        getAudioRequired(request.getContentId());
+        if (request.getCoverId() != null) {
+            getImageRequired(request.getCoverId());
+        }
 
         var genres = request.getGenreIds() == null ? null :
                 request.getGenreIds().stream()
@@ -90,17 +82,19 @@ public class AudioService {
         var audio = requestMapper.toEntity(request, genres, user);
         var savedAudio = audioRepository.save(audio);
 
-        var payload = audioSmartMapper.toPayload(savedAudio, content, cover);
-
         publisher.publish(AUDIO.getName(),
                 singletonList(EventUtils.toCreatedEvent(audio, user))
         );
-        return payload;
+        return savedAudio.getId();
     }
 
-    public List<AudioPayload> searchBulk(List<Long> ids) {
+    public List<AudioPayload> searchBulk(List<Long> ids, @Nullable Long clientId) {
         final var bulk = audioRepository.findBulk(ids);
-        return bulk.stream().map(audioSmartMapper::toPayload)
+
+        final var liked = clientId == null ? new HashSet<Long>() :
+            audioLikeService.likedFromBulk(bulk.stream().map(Audio::getId).collect(Collectors.toSet()), clientId);
+
+        return bulk.stream().map(it -> audioSmartMapper.toPayload(it, liked.contains(it.getId())))
                 .sorted(Comparator.comparing(it -> ids.indexOf(it.getId())))
                 .collect(Collectors.toList());
     }
@@ -112,7 +106,10 @@ public class AudioService {
         Page<Audio> page = ownerId.equals(currentUser) ? audioRepository.findAudioByOwnerId(ownerId, pageable)
                 : audioRepository.findAudioByOwnerIdAndIsPrivateFalse(ownerId, pageable);
 
-        return page.map(it -> audioSmartMapper.toPayload(it, owner));
+        var liked = currentUser == null ? new HashSet<Long>() :
+                audioLikeService.likedFromBulk(page.stream().map(Audio::getId).collect(Collectors.toSet()), currentUser);
+
+        return page.map(it -> audioSmartMapper.toPayload(it, owner, liked.contains(it.getId())));
     }
 
     public AudioPayload find(Long audioId, Long user) {
@@ -121,11 +118,11 @@ public class AudioService {
 
         visibilityAccessManager.authorize(user, audio);
 
-        return audioSmartMapper.toPayload(audio);
+        return audioSmartMapper.toPayload(audio, audioLikeService.isLiked(audioId, user));
     }
 
     @Transactional
-    public AudioPayload update(Long id, AudioPostRequest request, Long user) {
+    public void update(Long id, AudioPostRequest request, Long user) {
         var audio = audioRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Audio with id " + id + " was not found"));
 
@@ -142,8 +139,6 @@ public class AudioService {
                 AUDIO.getName(),
                 singletonList(toUpdatedEvent(savedAudio))
         );
-
-        return audioSmartMapper.toPayload(savedAudio, content, cover);
     }
 
     public void like(Long audioId, @NotNull Long user) {
@@ -194,7 +189,10 @@ public class AudioService {
 
         Page<Audio> audioPage = audioRepository.findAudioFromPlaylistProtected(playlistId, user, pageable);
 
-        return audioPage.map(audioSmartMapper::toPayload);
+        var liked = user == null ? new HashSet<Long>() :
+            audioLikeService.likedFromBulk(audioPage.stream().map(Audio::getId).collect(Collectors.toSet()), user);
+
+        return audioPage.map(it -> audioSmartMapper.toPayload(it, liked.contains(it.getId())));
     }
 
     @Transactional

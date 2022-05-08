@@ -18,7 +18,7 @@ public class AudioSmartMapper {
     private final ResourceService resourceService;
     private final UserService userService;
 
-    public AudioPayload toPayload(Audio audio) {
+    public AudioPayload toPayload(Audio audio, Boolean isLiked) {
 
         var content = resourceService.getAudio(audio.getContentId())
                 .orElse(null);
@@ -29,18 +29,18 @@ public class AudioSmartMapper {
         var user = userService.findUser(audio.getOwnerId())
                 .orElse(null);
 
-        return audioMapper.toPayload(audio, content, cover, user);
+        return audioMapper.toPayload(audio, content, cover, user, isLiked);
     }
 
-    public AudioPayload toPayload(Audio audio, Resource content, Resource cover) {
+    public AudioPayload toPayload(Audio audio, Resource content, Resource cover, Boolean isLiked) {
 
         var user = userService.findUser(audio.getOwnerId())
                 .orElse(null);
 
-        return audioMapper.toPayload(audio, content, cover, user);
+        return audioMapper.toPayload(audio, content, cover, user, isLiked);
     }
 
-    public AudioPayload toPayload(Audio audio, User user) {
+    public AudioPayload toPayload(Audio audio, User user, Boolean isLiked) {
 
         var content = resourceService.getAudio(audio.getContentId())
                 .orElse(null);
@@ -48,6 +48,6 @@ public class AudioSmartMapper {
         var cover = resourceService.getImage(audio.getCoverId())
                 .orElse(null);
 
-        return audioMapper.toPayload(audio, content, cover, user);
+        return audioMapper.toPayload(audio, content, cover, user, isLiked);
     }
 }

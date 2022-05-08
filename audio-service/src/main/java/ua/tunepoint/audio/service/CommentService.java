@@ -54,7 +54,7 @@ public class CommentService {
     private final EventPublisher publisher;
 
     @Transactional
-    public CommentPayload save(Long audioId, AudioCommentPostRequest request, Long user) {
+    public Long save(Long audioId, AudioCommentPostRequest request, Long user) {
 
         var audio = findAudioElseThrow(audioId);
 
@@ -64,13 +64,12 @@ public class CommentService {
         comment.setAudio(audio);
 
         var savedComment = commentRepository.save(comment);
-        var payload = commentSmartMapper.toPayload(savedComment);
 
         publisher.publish(AUDIO_COMMENT.getName(),
                 Collections.singletonList(toCreatedEvent(comment, audio, user))
         );
 
-        return payload;
+        return savedComment.getId();
     }
 
     public Page<CommentPayload> find(Long audioId, @Nullable Long user, Pageable pageable) {
@@ -79,8 +78,9 @@ public class CommentService {
 
         audioVisibilityAccessManager.authorize(user, audio);
 
-        var comments = commentRepository.findCommentsByAudioAndReplyToIsNull(audio, pageable);
-        return comments.map(commentSmartMapper::toPayload);
+        var comments = commentRepository.findCommentsByAudioAndReplyToIsNullOrderByCreatedAtDesc(audio, pageable);
+
+        return comments.map(it -> commentSmartMapper.toPayload(it, user));
     }
 
     public CommentPayload find(Long id, @Nullable Long user) {
@@ -88,11 +88,11 @@ public class CommentService {
 
         audioVisibilityAccessManager.authorize(user, comment.getAudio());
 
-        return commentSmartMapper.toPayload(comment);
+        return commentSmartMapper.toPayload(comment, user);
     }
 
     @Transactional
-    public CommentPayload update(Long commentId, AudioCommentUpdateRequest request, Long user) {
+    public void update(Long commentId, AudioCommentUpdateRequest request, Long user) {
 
         var comment = findCommentElseThrow(commentId);
 
@@ -101,17 +101,13 @@ public class CommentService {
         comment = commentMapper.update(comment, request);
         var updatedComment = commentRepository.save(comment);
 
-        var payload = commentSmartMapper.toPayload(updatedComment);
-
         publisher.publish(AUDIO_COMMENT.getName(),
                 Collections.singletonList(toUpdateEvent(updatedComment, comment.getAudio(), user))
         );
-
-        return payload;
     }
 
     @Transactional
-    public CommentPayload delete(Long commentId, Long user) {
+    public void delete(Long commentId, Long user) {
         var comment = findCommentElseThrow(commentId);
 
         audioVisibilityAccessManager.authorize(user, comment.getAudio());
@@ -122,13 +118,9 @@ public class CommentService {
 
         var deletedComment = commentRepository.save(comment);
 
-        var payload = commentSmartMapper.toPayload(deletedComment);
-
         publisher.publish(AUDIO_COMMENT.getName(),
                 Collections.singletonList(toDeleteEvent(deletedComment, comment.getAudio(), user))
         );
-
-        return payload;
     }
 
     @Transactional
@@ -166,7 +158,7 @@ public class CommentService {
     }
 
     @Transactional
-    public CommentPayload reply(Long commentId, AudioCommentPostRequest request, Long user) {
+    public Long reply(Long commentId, AudioCommentPostRequest request, Long user) {
         var comment = findCommentElseThrow(commentId);
 
         audioVisibilityAccessManager.authorize(user, comment.getAudio());
@@ -177,13 +169,11 @@ public class CommentService {
 
         commentRepository.save(replyComment);
 
-        var payload = commentSmartMapper.toPayload(replyComment);
-
         publisher.publish(AUDIO_COMMENT.getName(),
                 Collections.singletonList(toReplyEvent(comment, replyComment, comment.getAudio(), user))
         );
 
-        return payload;
+        return replyComment.getId();
     }
 
     private Comment findCommentElseThrow(Long commentId) {

@@ -16,4 +16,5 @@ public class PlaylistUpdatedEvent extends BasePlaylistEvent {
     private String title;
     private String description;
     private Boolean isPrivate;
+    private String type;
 }

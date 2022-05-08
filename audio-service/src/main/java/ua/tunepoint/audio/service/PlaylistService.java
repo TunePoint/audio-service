@@ -26,7 +26,6 @@ import ua.tunepoint.audio.data.repository.PlaylistRepository;
 import ua.tunepoint.audio.data.repository.TagRepository;
 import ua.tunepoint.audio.model.request.PlaylistPostRequest;
 import ua.tunepoint.audio.model.request.PlaylistUpdateRequest;
-import ua.tunepoint.audio.model.response.domain.Resource;
 import ua.tunepoint.audio.model.response.payload.PlaylistPayload;
 import ua.tunepoint.audio.security.CommonVisibilityAccessManager;
 import ua.tunepoint.audio.security.playlist.PlaylistInteractionAccessManager;
@@ -38,6 +37,7 @@ import ua.tunepoint.security.UserPrincipal;
 import ua.tunepoint.web.exception.BadRequestException;
 import ua.tunepoint.web.exception.NotFoundException;
 
+import javax.annotation.Nullable;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -52,6 +52,7 @@ import static ua.tunepoint.audio.utils.EventUtils.toLikedEvent;
 import static ua.tunepoint.audio.utils.EventUtils.toRemovedEvent;
 import static ua.tunepoint.audio.utils.EventUtils.toUnlikedEvent;
 import static ua.tunepoint.audio.utils.EventUtils.toUpdatedEvent;
+import static ua.tunepoint.audio.utils.UserUtils.extractId;
 
 @Service
 @RequiredArgsConstructor
@@ -64,6 +65,8 @@ public class PlaylistService {
     private final TagRepository tagRepository;
 
     private final ResourceService resourceService;
+    private final UserService userService;
+    private final PlaylistLikeService playlistLikeService;
 
     private final RequestMapper requestMapper;
     private final PlaylistMapper playlistMapper;
@@ -77,7 +80,7 @@ public class PlaylistService {
     private final GenreRepository genreRepository;
 
     @Transactional
-    public PlaylistPayload create(PlaylistPostRequest request, ManagerType manager, Long clientId) {
+    public Long create(PlaylistPostRequest request, ManagerType manager, Long clientId) {
 
         Set<Long> requestAudioIds = request.getAudioIds();
 
@@ -93,9 +96,8 @@ public class PlaylistService {
             authorizedAudioSet.forEach((audio) -> commonVisibilityAccessManager.authorize(clientId, audio));
         }
 
-        Resource cover = null;
         if (request.getCoverId() != null) {
-            cover = resourceService.getImage(request.getCoverId())
+            resourceService.getImage(request.getCoverId())
                     .orElseThrow(() -> new BadRequestException("Image with id " + request.getCoverId() + " doesn't exist"));
         }
 
@@ -108,39 +110,32 @@ public class PlaylistService {
 
         playlistAudioRepository.saveAll(playlistAudioSet);
 
-        var payload = playlistSmartMapper.toPayload(savedPlaylist, cover);
-
         eventPublisher.publish(PLAYLIST.getName(),
                 singletonList(EventUtils.toCreatedEvent(savedPlaylist))
         );
 
-        return payload;
+        return savedPlaylist.getId();
     }
 
     @Transactional
-    public PlaylistPayload update(Long playlistId, PlaylistUpdateRequest request, Long clientId) {
+    public void update(Long playlistId, PlaylistUpdateRequest request, Long clientId) {
         Playlist playlist = findPlaylistRequired(playlistId);
 
         playlistUpdateAccessManager.authorize(clientId, playlist);
 
-        Resource cover = null;
         if (request.getCoverId() != null) {
-            cover = resourceService.getImage(request.getCoverId())
+            resourceService.getImage(request.getCoverId())
                     .orElseThrow(NotFoundException::new);
         }
 
         playlist = playlistMapper.merge(playlist, request);
 
-        Playlist savedPlaylist = playlistRepository.save(playlist); // TODO: publish event
-
-        var payload =  playlistSmartMapper.toPayload(savedPlaylist, cover);
+        Playlist savedPlaylist = playlistRepository.save(playlist);
 
         eventPublisher.publish(
                 PLAYLIST.getName(),
-                singletonList(toUpdatedEvent(playlist))
+                singletonList(toUpdatedEvent(savedPlaylist))
         );
-
-        return payload;
     }
 
     public PlaylistPayload findById(Long playlistId, Long clientId) {
@@ -149,12 +144,18 @@ public class PlaylistService {
 
         commonVisibilityAccessManager.authorize(clientId, playlist);
 
-        return playlistSmartMapper.toPayload(playlist);
+        return playlistSmartMapper.toPayload(playlist, playlistLikeService.isLiked(playlistId, clientId));
     }
 
     public Page<PlaylistPayload> findByOwner(Long ownerId, Pageable pageable, UserPrincipal user) {
-        return playlistRepository.findByOwnerIdWithAccessControl(ownerId, user == null ? null : user.getId(), pageable)
-                .map(playlistSmartMapper::toPayload);
+        var owner = userService.findUser(ownerId)
+                .orElseThrow(() -> new NotFoundException("user with id " + ownerId + " was not found"));
+        var page =  playlistRepository.findByOwnerIdWithAccessControl(ownerId, extractId(user), pageable);
+
+        var liked = user == null ? new HashSet<Long>() :
+                playlistLikeService.likedFromBulk(page.stream().map(Playlist::getId).collect(Collectors.toSet()), extractId(user));
+
+        return page.map(it -> playlistSmartMapper.toPayload(it, owner, liked.contains(it.getId())));
     }
 
     @Transactional
@@ -371,9 +372,14 @@ public class PlaylistService {
                 .orElseThrow(() -> new NotFoundException("Playlist with id " + id + " was not found"));
     }
 
-    public List<PlaylistPayload> searchBulk(List<Long> ids) {
-        return playlistRepository.findBulk(ids)
-                .stream().map(playlistSmartMapper::toPayload)
+    public List<PlaylistPayload> searchBulk(List<Long> ids, @Nullable Long clientId) {
+        var bulk =  playlistRepository.findBulk(ids);
+
+        var liked = clientId == null ? new HashSet<Long>() :
+                playlistLikeService.likedFromBulk(bulk.stream().map(Playlist::getId).collect(Collectors.toSet()), clientId);
+
+        return bulk
+                .stream().map(it -> playlistSmartMapper.toPayload(it, liked.contains(it.getId())))
                 .sorted(Comparator.comparing(it -> ids.indexOf(it.getId())))
                 .collect(Collectors.toList());
     }

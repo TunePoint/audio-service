@@ -13,7 +13,7 @@ import java.util.Optional;
 @Repository
 public interface CommentRepository extends PagingAndSortingRepository<Comment, Long> {
 
-    Page<Comment> findCommentsByAudioAndReplyToIsNull(Audio audio, Pageable pageable);
+    Page<Comment> findCommentsByAudioAndReplyToIsNullOrderByCreatedAtDesc(Audio audio, Pageable pageable);
 
     @Query("SELECT c FROM Comment c LEFT JOIN FETCH c.audio WHERE c.id = :id")
     Optional<Comment> findByIdWithAudio(Long id);

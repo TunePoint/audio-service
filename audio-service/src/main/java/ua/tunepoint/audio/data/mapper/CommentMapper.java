@@ -14,11 +14,15 @@ import ua.tunepoint.audio.model.response.payload.CommentPayload;
 public interface CommentMapper {
 
     @Mappings({
-            @Mapping(target = "likeCount", source = "statistics.likeCount"),
-            @Mapping(target = "replyCount", source = "statistics.replyCount"),
-            @Mapping(target = "replies", ignore = true)
+            @Mapping(target = "likeCount", source = "comment.statistics.likeCount"),
+            @Mapping(target = "replyCount", source = "comment.statistics.replyCount"),
+            @Mapping(target = "id", source = "comment.id"),
+            @Mapping(target = "content", source = "comment.content"),
+            @Mapping(target = "createdAt", source = "comment.createdAt"),
+            @Mapping(target = "replies", ignore = true),
+            @Mapping(target = "isLiked", source = "isLiked")
     })
-    CommentPayload toPayload(Comment entity);
+    CommentPayload toPayload(Comment comment, Boolean isLiked);
 
     @Mappings({
             @Mapping(target = "isEdited", constant = "true")

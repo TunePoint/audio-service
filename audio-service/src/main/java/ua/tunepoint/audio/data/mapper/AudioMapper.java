@@ -34,9 +34,10 @@ public interface AudioMapper {
             @Mapping(target = "tags", source = "audio.tags"),
             @Mapping(target = "cover", source = "cover"),
             @Mapping(target = "owner", source = "owner"),
-            @Mapping(target = "type", source = "audio.type")
+            @Mapping(target = "type", source = "audio.type"),
+            @Mapping(target = "isLiked", source = "isLiked")
     })
-    AudioPayload toPayload(Audio audio, Resource content, Resource cover, User owner);
+    AudioPayload toPayload(Audio audio, Resource content, Resource cover, User owner, Boolean isLiked);
 
     default String typeToString(AudioType type) {
         return type == null ? null : type.toString();

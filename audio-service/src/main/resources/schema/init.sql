@@ -104,8 +104,10 @@ CREATE TABLE audio.playlists
     title VARCHAR(64),
     description VARCHAR(256),
     owner_id BIGINT NOT NULL,
+    created_at TIMESTAMP NOT NULL,
     is_private BOOLEAN DEFAULT FALSE,
     manager_type INT NOT NULL,
+    type INT NOT NULL,
     cover_id VARCHAR
 );
 

@@ -5,6 +5,8 @@ import lombok.NoArgsConstructor;
 import ua.tunepoint.audio.model.response.domain.Resource;
 import ua.tunepoint.audio.model.response.domain.User;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Set;
 
 @Data
@@ -17,6 +19,9 @@ public class PlaylistPayload {
     private Boolean isPrivate = false;
     private Long likeCount;
     private Long audioCount;
+    private LocalDateTime createdAt;
+    private Boolean isLiked;
+    private String type;
     private Set<TagPayload> tags;
     private Set<GenrePayload> genres;
 

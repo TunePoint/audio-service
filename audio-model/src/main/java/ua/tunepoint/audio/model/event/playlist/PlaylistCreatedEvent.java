@@ -21,4 +21,5 @@ public class PlaylistCreatedEvent extends BasePlaylistEvent {
     private String description;
     private String managerType;
     private Boolean isPrivate;
+    private String type;
 }

@@ -17,6 +17,7 @@ public class CommentPayload {
     private Long userId;
     private String content;
     private LocalDateTime createdAt;
+    private Boolean isLiked;
 
     private List<CommentPayload> replies;
     private Long likeCount;

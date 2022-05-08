@@ -25,6 +25,7 @@ import ua.tunepoint.audio.model.response.CommentPostResponse;
 import ua.tunepoint.audio.model.response.CommentUpdateResponse;
 import ua.tunepoint.audio.service.CommentService;
 import ua.tunepoint.security.UserPrincipal;
+import ua.tunepoint.web.model.IdResponse;
 import ua.tunepoint.web.model.StatusResponse;
 
 import static ua.tunepoint.audio.utils.UserUtils.extractId;
@@ -38,10 +39,9 @@ public class CommentController {
 
     @PostMapping(params = {"audioId"})
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<CommentPostResponse> postComment(@RequestParam Long audioId, @RequestBody AudioCommentPostRequest request, @AuthenticationPrincipal UserPrincipal user) {
-        var payload = commentService.save(audioId, request, extractId(user));
-        var response = CommentPostResponse.builder().payload(payload).build();
-        return ResponseEntity.ok(response);
+    public ResponseEntity<IdResponse> postComment(@RequestParam Long audioId, @RequestBody AudioCommentPostRequest request, @AuthenticationPrincipal UserPrincipal user) {
+        var id = commentService.save(audioId, request, extractId(user));
+        return ResponseEntity.ok(IdResponse.withId(id));
     }
 
     @GetMapping(params = {"audioId"})
@@ -60,18 +60,16 @@ public class CommentController {
 
     @PutMapping(path = "/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<CommentUpdateResponse> updateComment(@PathVariable Long id, @RequestBody AudioCommentUpdateRequest request, @AuthenticationPrincipal UserPrincipal user) {
-        var payload = commentService.update(id, request, extractId(user));
-        var response = CommentUpdateResponse.builder().payload(payload).build();
-        return ResponseEntity.ok(response);
+    public ResponseEntity<StatusResponse> updateComment(@PathVariable Long id, @RequestBody AudioCommentUpdateRequest request, @AuthenticationPrincipal UserPrincipal user) {
+        commentService.update(id, request, extractId(user));
+        return ResponseEntity.ok(StatusResponse.builder().build());
     }
 
     @DeleteMapping(path = "/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<CommentDeleteResponse> deleteComment(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal user) {
-        var payload = commentService.delete(id, extractId(user));
-        var response = CommentDeleteResponse.builder().payload(payload).build();
-        return ResponseEntity.ok(response);
+    public ResponseEntity<StatusResponse> deleteComment(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal user) {
+        commentService.delete(id, extractId(user));
+        return ResponseEntity.ok(StatusResponse.builder().build());
     }
 
     @PostMapping(path = "/{id}/likes")
@@ -90,9 +88,8 @@ public class CommentController {
 
     @PostMapping("/{id}/replies")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<CommentPostResponse> replyComment(@PathVariable Long id, @RequestBody AudioCommentPostRequest request, @AuthenticationPrincipal UserPrincipal user) {
-        var payload = commentService.reply(id, request, extractId(user));
-        var response = CommentPostResponse.builder().payload(payload).build();
-        return ResponseEntity.ok(response);
+    public ResponseEntity<IdResponse> replyComment(@PathVariable Long id, @RequestBody AudioCommentPostRequest request, @AuthenticationPrincipal UserPrincipal user) {
+        var replyId = commentService.reply(id, request, extractId(user));
+        return ResponseEntity.ok(IdResponse.withId(replyId));
     }
 }

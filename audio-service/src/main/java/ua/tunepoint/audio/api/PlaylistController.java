@@ -1,9 +1,13 @@
 package ua.tunepoint.audio.api;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -18,11 +22,13 @@ import ua.tunepoint.audio.model.request.PlaylistPostRequest;
 import ua.tunepoint.audio.model.request.PlaylistUpdateRequest;
 import ua.tunepoint.audio.model.response.PlaylistBulkResponse;
 import ua.tunepoint.audio.model.response.PlaylistGetResponse;
+import ua.tunepoint.audio.model.response.PlaylistPageResponse;
 import ua.tunepoint.audio.model.response.PlaylistPostResponse;
 import ua.tunepoint.audio.model.response.PlaylistUpdateResponse;
 import ua.tunepoint.audio.model.response.payload.PlaylistPayload;
 import ua.tunepoint.audio.service.PlaylistService;
 import ua.tunepoint.security.UserPrincipal;
+import ua.tunepoint.web.model.IdResponse;
 import ua.tunepoint.web.model.StatusResponse;
 
 import java.util.List;
@@ -37,20 +43,30 @@ public class PlaylistController {
     private final PlaylistService service;
 
     @GetMapping("/_bulk")
-    public ResponseEntity<PlaylistBulkResponse> searchBulk(@RequestParam("ids") List<Long> ids) {
+    public ResponseEntity<PlaylistBulkResponse> searchBulk(@RequestParam("ids") List<Long> ids, @AuthenticationPrincipal UserPrincipal user) {
         return ResponseEntity.ok(
                 PlaylistBulkResponse.builder()
-                        .payload(service.searchBulk(ids))
+                        .payload(service.searchBulk(ids, extractId(user)))
+                        .build()
+        );
+    }
+
+    @GetMapping("/_users")
+    public ResponseEntity<PlaylistPageResponse> playlistsOfUser(@RequestParam("id") Long userId, @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable, @AuthenticationPrincipal UserPrincipal user) {
+        return ResponseEntity.ok(
+                PlaylistPageResponse.builder()
+                        .payload(
+                                service.findByOwner(userId, pageable, user)
+                        )
                         .build()
         );
     }
 
     @PostMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<PlaylistPostResponse> postPlaylist(@RequestBody PlaylistPostRequest request, @AuthenticationPrincipal UserPrincipal user) {
-        var payload = service.create(request, ManagerType.USER, extractId(user));
-        var response = PlaylistPostResponse.builder().payload(payload).build();
-        return ResponseEntity.ok(response);
+    public ResponseEntity<IdResponse> postPlaylist(@RequestBody @Validated PlaylistPostRequest request, @AuthenticationPrincipal UserPrincipal user) {
+        var id = service.create(request, ManagerType.USER, extractId(user));
+        return ResponseEntity.ok(IdResponse.withId(id));
     }
 
     @DeleteMapping("/{playlistId}")
@@ -62,10 +78,9 @@ public class PlaylistController {
 
     @PutMapping("/{playlistId}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<PlaylistUpdateResponse> updatePlaylist(@PathVariable Long playlistId, @RequestBody PlaylistUpdateRequest request, @AuthenticationPrincipal UserPrincipal user) {
-        var payload = service.update(playlistId, request, extractId(user));
-        var response = PlaylistUpdateResponse.builder().payload(payload).build();
-        return ResponseEntity.ok(response);
+    public ResponseEntity<StatusResponse> updatePlaylist(@PathVariable Long playlistId, @RequestBody PlaylistUpdateRequest request, @AuthenticationPrincipal UserPrincipal user) {
+        service.update(playlistId, request, extractId(user));
+        return ResponseEntity.ok(StatusResponse.builder().build());
     }
 
     @GetMapping("/{playlistId}")

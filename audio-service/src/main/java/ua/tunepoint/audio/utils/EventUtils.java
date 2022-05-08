@@ -158,6 +158,7 @@ public class EventUtils {
                 .title(playlist.getTitle())
                 .description(playlist.getDescription())
                 .isPrivate(playlist.isPrivate())
+                .type(playlist.getType().getName())
                 .build();
     }
 
@@ -169,6 +170,7 @@ public class EventUtils {
                 .description(playlist.getDescription())
                 .isPrivate(playlist.isPrivate())
                 .time(LocalDateTime.now())
+                .type(playlist.getType().getName())
                 .build();
     }
 

@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ua.tunepoint.audio.model.request.AudioPostRequest;
 import ua.tunepoint.audio.model.response.AudioBulkResponse;
 import ua.tunepoint.audio.model.response.AudioGetResponse;
-import ua.tunepoint.audio.model.response.AudioListGetResponse;
+import ua.tunepoint.audio.model.response.AudioPageResponse;
 import ua.tunepoint.audio.model.response.AudioPostResponse;
 import ua.tunepoint.audio.model.response.AudioUpdateResponse;
 import ua.tunepoint.audio.model.response.payload.AudioPayload;
@@ -28,6 +28,7 @@ import ua.tunepoint.audio.service.AudioService;
 import ua.tunepoint.audio.service.ListeningService;
 import ua.tunepoint.security.UserPrincipal;
 import ua.tunepoint.web.exception.BadRequestException;
+import ua.tunepoint.web.model.IdResponse;
 import ua.tunepoint.web.model.StatusResponse;
 
 import java.util.List;
@@ -43,11 +44,27 @@ public class AudioController {
     private final ListeningService listeningService;
 
     @GetMapping("/_bulk")
-    public ResponseEntity<AudioBulkResponse> getBulk(@RequestParam("ids") List<Long> ids) {
+    public ResponseEntity<AudioBulkResponse> getBulk(@RequestParam("ids") List<Long> ids, @AuthenticationPrincipal UserPrincipal user) {
         return ResponseEntity.ok(
-            AudioBulkResponse.builder()
-                    .payload(audioService.searchBulk(ids))
-                    .build()
+                AudioBulkResponse.builder()
+                        .payload(audioService.searchBulk(ids, extractId(user)))
+                        .build()
+        );
+    }
+
+    @GetMapping("/_users")
+    public ResponseEntity<AudioPageResponse> getAudioUploadedByUser(@RequestParam(name = "id") Long userId, @PageableDefault Pageable pageable, @AuthenticationPrincipal UserPrincipal user) {
+        var payload = audioService.findByOwner(userId, extractId(user), pageable);
+        return ResponseEntity.ok(
+                AudioPageResponse.builder().payload(payload).build()
+        );
+    }
+
+    @GetMapping("/_playlists")
+    public ResponseEntity<AudioPageResponse> getAudioFromPlaylist(@RequestParam(name = "id") Long playlistId, @PageableDefault Pageable pageable, @AuthenticationPrincipal UserPrincipal user) {
+        var payload = audioService.findByPlaylist(playlistId, extractId(user), pageable);
+        return ResponseEntity.ok(
+                AudioPageResponse.builder().payload(payload).build()
         );
     }
 
@@ -69,40 +86,19 @@ public class AudioController {
         );
     }
 
-    @GetMapping(params = {"searchBy", "id"})
-    public ResponseEntity<AudioListGetResponse> getUserAudio(
-            @RequestParam("searchBy") String searchBy,
-            @RequestParam("id") Long id,
-            @PageableDefault(sort = "uploadedTime", direction = Sort.Direction.DESC) Pageable pageable,
-            @AuthenticationPrincipal UserPrincipal user) {
-
-        Page<AudioPayload> payload = switch (searchBy) {
-            case "user" -> audioService.findByOwner(id, extractId(user), pageable);
-            case "playlist" -> audioService.findByPlaylist(id, extractId(user), pageable);
-            default -> throw new BadRequestException("Unknown value of parameter 'searchBy'");
-        };
-
-        var response = AudioListGetResponse.builder().payload(payload).build();
-
-        return ResponseEntity.ok(response);
-    }
-
     @PostMapping
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<AudioPostResponse> postAudio(@RequestBody AudioPostRequest request, @AuthenticationPrincipal UserPrincipal user) {
-        var payload = audioService.save(request, extractId(user));
-        var response = AudioPostResponse.builder().payload(payload).build();
+    public ResponseEntity<IdResponse> postAudio(@RequestBody AudioPostRequest request, @AuthenticationPrincipal UserPrincipal user) {
+        var id = audioService.save(request, extractId(user));
 
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(IdResponse.withId(id));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<AudioUpdateResponse> updateAudio(@PathVariable Long id, @RequestBody AudioPostRequest request, @AuthenticationPrincipal UserPrincipal user) {
-        var payload = audioService.update(id, request, extractId(user));
-        var response = AudioUpdateResponse.builder().payload(payload).build();
-
-        return ResponseEntity.ok(response);
+    public ResponseEntity<StatusResponse> updateAudio(@PathVariable Long id, @RequestBody AudioPostRequest request, @AuthenticationPrincipal UserPrincipal user) {
+        audioService.update(id, request, extractId(user));
+        return ResponseEntity.ok(StatusResponse.builder().build());
     }
 
     @PostMapping("/{id}/likes")

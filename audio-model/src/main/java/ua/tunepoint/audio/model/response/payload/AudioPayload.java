@@ -22,6 +22,7 @@ public class AudioPayload {
     private Long likeCount = 0L;
     private Long listeningCount = 0L;
     private Long commentCount = 0L;
+    private Boolean isLiked;
     private LocalDateTime uploadedTime;
     private Resource cover;
     private Resource content;

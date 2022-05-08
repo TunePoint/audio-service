@@ -33,6 +33,7 @@ public class AudioPostRequest {
 
     private Set<Long> genreIds;
 
+    @NotNull
     private RequestAudioType type;
 
     private Boolean isPrivate = false;

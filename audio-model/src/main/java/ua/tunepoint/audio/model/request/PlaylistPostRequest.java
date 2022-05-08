@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import javax.validation.constraints.NotNull;
 import java.util.Set;
 
 @Data
@@ -13,8 +14,11 @@ import java.util.Set;
 @NoArgsConstructor
 public class PlaylistPostRequest {
 
+    @NotNull
     private String title;
     private String description;
+    @NotNull
+    private RequestPlaylistType type;
     private Boolean isPrivate = false;
     private Set<Long> audioIds;
     private Set<Long> genreIds;

@@ -12,10 +12,12 @@ import ua.tunepoint.audio.data.entity.audio.type.AudioType;
 import ua.tunepoint.audio.data.entity.comment.Comment;
 import ua.tunepoint.audio.data.entity.playlist.ManagerType;
 import ua.tunepoint.audio.data.entity.playlist.Playlist;
+import ua.tunepoint.audio.data.entity.playlist.PlaylistType;
 import ua.tunepoint.audio.model.request.AudioCommentPostRequest;
 import ua.tunepoint.audio.model.request.AudioPostRequest;
 import ua.tunepoint.audio.model.request.PlaylistPostRequest;
 import ua.tunepoint.audio.model.request.RequestAudioType;
+import ua.tunepoint.audio.model.request.RequestPlaylistType;
 
 import java.util.Set;
 
@@ -57,7 +59,12 @@ public interface RequestMapper {
             @Mapping(target = "description", source = "request.description"),
             @Mapping(target = "isPrivate", source = "request.isPrivate"),
             @Mapping(target = "coverId", source = "request.coverId"),
+            @Mapping(target = "type", source = "request.type"),
             @Mapping(target = "managerType", source = "manager")
     })
     Playlist toEntity(PlaylistPostRequest request, ManagerType manager, Long userId);
+
+    default PlaylistType mapRequestType(RequestPlaylistType type) {
+        return PlaylistType.withName(type.toString());
+    }
 }
