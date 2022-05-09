@@ -99,6 +99,16 @@ public class AudioService {
                 .collect(Collectors.toList());
     }
 
+    public Page<AudioPayload> findLikedByUser(Long userId, Pageable pageable, Long clientId) {
+
+        var liked = audioRepository.findAudioLikedByUserProtected(userId, clientId, pageable);
+
+        final var likedByClient = clientId == null ? new HashSet<Long>() :
+                audioLikeService.likedFromBulk(liked.stream().map(Audio::getId).collect(Collectors.toSet()), clientId);
+
+        return liked.map(it -> audioSmartMapper.toPayload(it, likedByClient.contains(it.getId())));
+    }
+
     public Page<AudioPayload> findByOwner(@NotNull Long ownerId, @Nullable Long currentUser, Pageable pageable) {
         var owner = userService.findUser(ownerId)
                 .orElseThrow(() -> new NotFoundException("User with id " + ownerId + " was not found"));

@@ -150,12 +150,21 @@ public class PlaylistService {
     public Page<PlaylistPayload> findByOwner(Long ownerId, Pageable pageable, UserPrincipal user) {
         var owner = userService.findUser(ownerId)
                 .orElseThrow(() -> new NotFoundException("user with id " + ownerId + " was not found"));
-        var page =  playlistRepository.findByOwnerIdWithAccessControl(ownerId, extractId(user), pageable);
+        var page =  playlistRepository.findByOwnerIdWithProtected(ownerId, extractId(user), pageable);
 
         var liked = user == null ? new HashSet<Long>() :
                 playlistLikeService.likedFromBulk(page.stream().map(Playlist::getId).collect(Collectors.toSet()), extractId(user));
 
         return page.map(it -> playlistSmartMapper.toPayload(it, owner, liked.contains(it.getId())));
+    }
+
+    public Page<PlaylistPayload> findByUserLiked(Long userId, Pageable pageable, Long clientId) {
+        var page = playlistRepository.findPlaylistLikedByUserProtected(userId, clientId, pageable);
+
+        var liked = clientId == null ? new HashSet<Long>() :
+                playlistLikeService.likedFromBulk(page.stream().map(Playlist::getId).collect(Collectors.toSet()), clientId);
+
+        return page.map(it -> playlistSmartMapper.toPayload(it, liked.contains(it.getId())));
     }
 
     @Transactional

@@ -68,6 +68,15 @@ public class AudioController {
         );
     }
 
+    @GetMapping("/_likes")
+    public ResponseEntity<AudioPageResponse> getAudioLikedByUser(@RequestParam(name = "id") Long userId, @PageableDefault Pageable pageable, @AuthenticationPrincipal UserPrincipal user) {
+        return ResponseEntity.ok(
+            AudioPageResponse.builder()
+                    .payload(audioService.findLikedByUser(userId, pageable, extractId(user)))
+                    .build()
+        );
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<AudioGetResponse> getAudio(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal user) {
         var payload = audioService.find(id, extractId(user));

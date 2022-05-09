@@ -62,6 +62,15 @@ public class PlaylistController {
         );
     }
 
+    @GetMapping("/_likes")
+    public ResponseEntity<PlaylistPageResponse> playlistLikedByUser(@RequestParam("id") Long userId, @PageableDefault Pageable pageable, @AuthenticationPrincipal UserPrincipal user) {
+        return ResponseEntity.ok(
+                PlaylistPageResponse.builder()
+                        .payload(service.findByUserLiked(userId, pageable, extractId(user)))
+                        .build()
+        );
+    }
+
     @PostMapping
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<IdResponse> postPlaylist(@RequestBody @Validated PlaylistPostRequest request, @AuthenticationPrincipal UserPrincipal user) {

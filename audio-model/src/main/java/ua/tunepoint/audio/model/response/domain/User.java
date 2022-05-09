@@ -13,6 +13,7 @@ public class User {
 
     private Long id;
     private String username;
+    private String pseudonym;
     private String firstName;
     private String lastName;
     private Resource avatar;

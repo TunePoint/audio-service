@@ -17,7 +17,8 @@ public interface UserMapper {
             @Mapping(target = "username", source = "username"),
             @Mapping(target = "firstName", source = "profile.firstName"),
             @Mapping(target = "lastName", source = "profile.lastName"),
-            @Mapping(target = "avatar", source = "profile.avatar")
+            @Mapping(target = "avatar", source = "profile.avatar"),
+            @Mapping(target = "pseudonym", source = "profile.pseudonym")
     })
     User toUser(UserPublicPayload user);
 }
