@@ -37,9 +37,9 @@ public class CommentController {
 
     private final CommentService commentService;
 
-    @PostMapping(params = {"audioId"})
+    @PostMapping("/_audio")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<IdResponse> postComment(@RequestParam Long audioId, @RequestBody AudioCommentPostRequest request, @AuthenticationPrincipal UserPrincipal user) {
+    public ResponseEntity<IdResponse> postComment(@RequestParam("id") Long audioId, @RequestBody AudioCommentPostRequest request, @AuthenticationPrincipal UserPrincipal user) {
         var id = commentService.save(audioId, request, extractId(user));
         return ResponseEntity.ok(IdResponse.withId(id));
     }
