@@ -44,8 +44,8 @@ public class CommentController {
         return ResponseEntity.ok(IdResponse.withId(id));
     }
 
-    @GetMapping(params = {"audioId"})
-    public ResponseEntity<CommentsGetResponse> getComments(@RequestParam Long audioId, @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable, @AuthenticationPrincipal UserPrincipal user) {
+    @GetMapping("/_audio")
+    public ResponseEntity<CommentsGetResponse> getComments(@RequestParam(value = "id") Long audioId, @PageableDefault(sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable, @AuthenticationPrincipal UserPrincipal user) {
         var payload = commentService.find(audioId, extractId(user), pageable) ;
         var response = CommentsGetResponse.builder().payload(payload).build();
         return ResponseEntity.ok(response);

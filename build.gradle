@@ -7,7 +7,7 @@ plugins {
 
 allprojects {
     group = 'ua.tunepoint'
-    version = '0.0.15'
+    version = '0.0.16'
 }
 
 subprojects {
@@ -69,8 +69,8 @@ subprojects {
             dependency 'ua.tunepoint:commons-security:0.0.3'
             dependency 'ua.tunepoint:resource-api:0.0.6'
             dependency 'ua.tunepoint:resource-model:0.0.6'
-            dependency 'ua.tunepoint:account-api:0.0.10'
-            dependency 'ua.tunepoint:account-model:0.0.10'
+            dependency 'ua.tunepoint:account-api:0.0.14'
+            dependency 'ua.tunepoint:account-model:0.0.14'
             dependency 'ua.tunepoint:auth-model:0.0.9'
             dependency 'ua.tunepoint:commons-web-model:0.0.5'
             dependency 'ua.tunepoint:commons-web-exception:0.0.5'

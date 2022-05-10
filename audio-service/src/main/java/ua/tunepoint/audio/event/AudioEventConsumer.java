@@ -8,6 +8,7 @@ import ua.tunepoint.audio.data.entity.playlist.ManagerType;
 import ua.tunepoint.audio.model.event.audio.AudioLikeEvent;
 import ua.tunepoint.audio.model.event.audio.AudioUnlikeEvent;
 import ua.tunepoint.audio.model.request.PlaylistPostRequest;
+import ua.tunepoint.audio.model.request.RequestPlaylistType;
 import ua.tunepoint.audio.service.PlaylistService;
 import ua.tunepoint.auth.model.event.user.UserRegisteredEvent;
 import ua.tunepoint.event.starter.handler.DomainEventHandlers;
@@ -64,6 +65,7 @@ public class AudioEventConsumer {
                         .title(playlistProperties.getFavourite().getTitle())
                         .description(playlistProperties.getFavourite().getDescription())
                         .isPrivate(true)
+                        .type(RequestPlaylistType.PLAYLIST)
                         .build(),
                 ManagerType.SERVICE_LIKES,
                 event.getUserId()

@@ -16,5 +16,7 @@ public class User {
     private String pseudonym;
     private String firstName;
     private String lastName;
+    private Long followerCount;
+    private Long audioCount;
     private Resource avatar;
 }

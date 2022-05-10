@@ -151,6 +151,7 @@ public class AudioService {
         );
     }
 
+    @Transactional
     public void like(Long audioId, @NotNull Long user) {
         var audio = audioRepository.findById(audioId)
                 .orElseThrow(() -> new NotFoundException("Audio with id " + audioId + " was not found"));
@@ -171,6 +172,7 @@ public class AudioService {
         );
     }
 
+    @Transactional
     public void unlike(Long audioId, @NotNull Long user) {
         var audio = audioRepository.findById(audioId)
                 .orElseThrow(() -> new NotFoundException("Audio with id " + audioId + " was not found"));
