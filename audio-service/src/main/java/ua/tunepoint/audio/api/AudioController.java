@@ -1,9 +1,7 @@
 package ua.tunepoint.audio.api;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,13 +19,9 @@ import ua.tunepoint.audio.model.request.AudioPostRequest;
 import ua.tunepoint.audio.model.response.AudioBulkResponse;
 import ua.tunepoint.audio.model.response.AudioGetResponse;
 import ua.tunepoint.audio.model.response.AudioPageResponse;
-import ua.tunepoint.audio.model.response.AudioPostResponse;
-import ua.tunepoint.audio.model.response.AudioUpdateResponse;
-import ua.tunepoint.audio.model.response.payload.AudioPayload;
 import ua.tunepoint.audio.service.AudioService;
 import ua.tunepoint.audio.service.ListeningService;
 import ua.tunepoint.security.UserPrincipal;
-import ua.tunepoint.web.exception.BadRequestException;
 import ua.tunepoint.web.model.IdResponse;
 import ua.tunepoint.web.model.StatusResponse;
 

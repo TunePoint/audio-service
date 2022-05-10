@@ -20,7 +20,8 @@ public interface UserMapper {
             @Mapping(target = "avatar", source = "profile.avatar"),
             @Mapping(target = "pseudonym", source = "profile.pseudonym"),
             @Mapping(target = "followerCount", source = "statistics.followerCount"),
-            @Mapping(target = "audioCount", source = "statistics.audioCount")
+            @Mapping(target = "audioCount", source = "statistics.audioCount"),
+            @Mapping(target = "isFollowed", source = "isFollowed")
     })
     User toUser(UserPublicPayload user);
 }

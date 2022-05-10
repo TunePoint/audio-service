@@ -18,5 +18,6 @@ public class User {
     private String lastName;
     private Long followerCount;
     private Long audioCount;
+    private Boolean isFollowed;
     private Resource avatar;
 }
