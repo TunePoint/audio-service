@@ -17,6 +17,7 @@ import ua.tunepoint.audio.data.repository.GenreRepository;
 import ua.tunepoint.audio.data.repository.PlaylistRepository;
 import ua.tunepoint.audio.data.repository.TagRepository;
 import ua.tunepoint.audio.model.request.AudioPostRequest;
+import ua.tunepoint.audio.model.request.AudioUpdateRequest;
 import ua.tunepoint.audio.model.response.domain.Resource;
 import ua.tunepoint.audio.model.response.payload.AudioPayload;
 import ua.tunepoint.audio.security.CommonVisibilityAccessManager;
@@ -132,13 +133,12 @@ public class AudioService {
     }
 
     @Transactional
-    public void update(Long id, AudioPostRequest request, Long user) {
+    public void update(Long id, AudioUpdateRequest request, Long user) {
         var audio = audioRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Audio with id " + id + " was not found"));
 
         updateAccessManager.authorize(user, audio);
 
-        var content = getAudioRequired(request.getContentId());
         var cover = getImageRequired(request.getCoverId());
 
         requestMapper.mergeEntity(audio, request);

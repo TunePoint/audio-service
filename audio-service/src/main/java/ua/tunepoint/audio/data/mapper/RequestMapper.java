@@ -15,6 +15,7 @@ import ua.tunepoint.audio.data.entity.playlist.Playlist;
 import ua.tunepoint.audio.data.entity.playlist.PlaylistType;
 import ua.tunepoint.audio.model.request.AudioCommentPostRequest;
 import ua.tunepoint.audio.model.request.AudioPostRequest;
+import ua.tunepoint.audio.model.request.AudioUpdateRequest;
 import ua.tunepoint.audio.model.request.PlaylistPostRequest;
 import ua.tunepoint.audio.model.request.RequestAudioType;
 import ua.tunepoint.audio.model.request.RequestPlaylistType;
@@ -44,7 +45,7 @@ public interface RequestMapper {
         return AudioType.withName(requestType.toString());
     }
 
-    void mergeEntity(@MappingTarget Audio entity, AudioPostRequest request);
+    void mergeEntity(@MappingTarget Audio entity, AudioUpdateRequest request);
 
     @Mappings({
             @Mapping(target = "content", source = "request.content"),

@@ -16,9 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import ua.tunepoint.audio.model.request.AudioPostRequest;
+import ua.tunepoint.audio.model.request.AudioUpdateRequest;
 import ua.tunepoint.audio.model.response.AudioBulkResponse;
 import ua.tunepoint.audio.model.response.AudioGetResponse;
 import ua.tunepoint.audio.model.response.AudioPageResponse;
+import ua.tunepoint.audio.model.response.AudioUpdateResponse;
 import ua.tunepoint.audio.service.AudioService;
 import ua.tunepoint.audio.service.ListeningService;
 import ua.tunepoint.security.UserPrincipal;
@@ -99,7 +101,7 @@ public class AudioController {
 
     @PutMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<StatusResponse> updateAudio(@PathVariable Long id, @RequestBody AudioPostRequest request, @AuthenticationPrincipal UserPrincipal user) {
+    public ResponseEntity<StatusResponse> updateAudio(@PathVariable Long id, @RequestBody AudioUpdateRequest request, @AuthenticationPrincipal UserPrincipal user) {
         audioService.update(id, request, extractId(user));
         return ResponseEntity.ok(StatusResponse.builder().build());
     }
