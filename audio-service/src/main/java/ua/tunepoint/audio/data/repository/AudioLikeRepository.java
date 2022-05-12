@@ -1,5 +1,7 @@
 package ua.tunepoint.audio.data.repository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -16,4 +18,7 @@ public interface AudioLikeRepository extends JpaRepository<AudioLike, AudioLikeI
 
     @Query("SELECT al.likeIdentity.audioId FROM AudioLike al WHERE al.likeIdentity.userId = :userId AND al.likeIdentity.audioId IN :audios")
     Set<Long> likedBulk(Collection<Long> audios, Long userId);
+
+    @Query("SELECT al FROM AudioLike al WHERE al.likeIdentity.audioId = :audioId ORDER BY al.createdAt DESC")
+    Page<AudioLike> findAudioLikesByAudioId(Long audioId, Pageable pageable);
 }

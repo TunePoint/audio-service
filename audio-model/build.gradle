@@ -7,6 +7,7 @@ dependencies {
     implementation 'org.springframework.data:spring-data-commons'
     implementation 'ua.tunepoint:commons-web-model'
     implementation 'ua.tunepoint:commons-event-model'
+    implementation 'ua.tunepoint:account-model'
     implementation 'com.fasterxml.jackson.core:jackson-annotations'
 
     compileOnly 'org.projectlombok:lombok'

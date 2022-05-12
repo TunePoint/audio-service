@@ -35,4 +35,13 @@ public interface AudioRepository extends PagingAndSortingRepository<Audio, Long>
     <T> Set<T> findAllByIdIn(Set<Long> ids, Class<T> projection);
 
     <T> Optional<T> findById(Long id, Class<T> projection);
+
+    @Query(
+        """
+            SELECT a FROM Audio a JOIN AudioListening l ON l.listeningIdentity.userId = :userId AND a.id = l.listeningIdentity.audioId
+            WHERE a.isPrivate = false OR a.ownerId = :userId 
+            ORDER BY l.lastListeningTime DESC
+        """
+    )
+    Page<Audio> findRecentListenings(Long userId, Pageable pageable);
 }

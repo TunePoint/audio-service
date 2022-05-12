@@ -19,9 +19,10 @@ import ua.tunepoint.audio.model.request.AudioPostRequest;
 import ua.tunepoint.audio.model.request.AudioUpdateRequest;
 import ua.tunepoint.audio.model.response.AudioBulkResponse;
 import ua.tunepoint.audio.model.response.AudioGetResponse;
+import ua.tunepoint.audio.model.response.UserPageResponse;
 import ua.tunepoint.audio.model.response.AudioPageResponse;
-import ua.tunepoint.audio.model.response.AudioUpdateResponse;
 import ua.tunepoint.audio.service.AudioService;
+import ua.tunepoint.audio.service.DomainUserService;
 import ua.tunepoint.audio.service.ListeningService;
 import ua.tunepoint.security.UserPrincipal;
 import ua.tunepoint.web.model.IdResponse;
@@ -38,6 +39,7 @@ public class AudioController {
 
     private final AudioService audioService;
     private final ListeningService listeningService;
+    private final DomainUserService domainUserService;
 
     @GetMapping("/_bulk")
     public ResponseEntity<AudioBulkResponse> getBulk(@RequestParam("ids") List<Long> ids, @AuthenticationPrincipal UserPrincipal user) {
@@ -67,9 +69,9 @@ public class AudioController {
     @GetMapping("/_likes")
     public ResponseEntity<AudioPageResponse> getAudioLikedByUser(@RequestParam(name = "id") Long userId, @PageableDefault Pageable pageable, @AuthenticationPrincipal UserPrincipal user) {
         return ResponseEntity.ok(
-            AudioPageResponse.builder()
-                    .payload(audioService.findLikedByUser(userId, pageable, extractId(user)))
-                    .build()
+                AudioPageResponse.builder()
+                        .payload(audioService.findLikedByUser(userId, pageable, extractId(user)))
+                        .build()
         );
     }
 
@@ -79,6 +81,17 @@ public class AudioController {
         var response = AudioGetResponse.builder().payload(payload).build();
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/listenings/me")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<AudioPageResponse> getRecentListenings(@PageableDefault Pageable pageable, @AuthenticationPrincipal UserPrincipal user) {
+        var payload = audioService.findRecentListenings(extractId(user), pageable);
+        return ResponseEntity.ok(
+                AudioPageResponse.builder()
+                        .payload(payload)
+                        .build()
+        );
     }
 
     @PostMapping("/{id}/listenings")
@@ -104,6 +117,16 @@ public class AudioController {
     public ResponseEntity<StatusResponse> updateAudio(@PathVariable Long id, @RequestBody AudioUpdateRequest request, @AuthenticationPrincipal UserPrincipal user) {
         audioService.update(id, request, extractId(user));
         return ResponseEntity.ok(StatusResponse.builder().build());
+    }
+
+    @GetMapping("/{id}/likes/users")
+    public ResponseEntity<UserPageResponse> getUsersLikedAudio(@PathVariable Long id, @PageableDefault Pageable pageable, @AuthenticationPrincipal UserPrincipal user) {
+        audioService.authorizeAccess(id, extractId(user));
+        return ResponseEntity.ok(
+                UserPageResponse.builder()
+                        .payload(domainUserService.findUsersLikedAudio(id, pageable))
+                        .build()
+        );
     }
 
     @PostMapping("/{id}/likes")

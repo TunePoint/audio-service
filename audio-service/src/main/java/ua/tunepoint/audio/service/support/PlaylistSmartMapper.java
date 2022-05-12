@@ -11,8 +11,6 @@ import ua.tunepoint.audio.service.ResourceService;
 import ua.tunepoint.audio.service.UserService;
 import ua.tunepoint.web.exception.NotFoundException;
 
-import java.util.Set;
-
 @Component
 @RequiredArgsConstructor
 public class PlaylistSmartMapper {

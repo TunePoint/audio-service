@@ -89,11 +89,21 @@ public class AudioService {
         return savedAudio.getId();
     }
 
+    public Page<AudioPayload> findRecentListenings(Long userId, Pageable pageable) {
+        var recentListenings = audioRepository.findRecentListenings(userId, pageable);
+
+        final var liked = audioLikeService.likedFromBulk(recentListenings.stream()
+                .map(Audio::getId).collect(Collectors.toSet()), userId);
+
+        return recentListenings
+                .map(it -> audioSmartMapper.toPayload(it, liked.contains(it.getId())));
+    }
+
     public List<AudioPayload> searchBulk(List<Long> ids, @Nullable Long clientId) {
         final var bulk = audioRepository.findBulk(ids);
 
         final var liked = clientId == null ? new HashSet<Long>() :
-            audioLikeService.likedFromBulk(bulk.stream().map(Audio::getId).collect(Collectors.toSet()), clientId);
+                audioLikeService.likedFromBulk(bulk.stream().map(Audio::getId).collect(Collectors.toSet()), clientId);
 
         return bulk.stream().map(it -> audioSmartMapper.toPayload(it, liked.contains(it.getId())))
                 .sorted(Comparator.comparing(it -> ids.indexOf(it.getId())))
@@ -130,6 +140,13 @@ public class AudioService {
         visibilityAccessManager.authorize(user, audio);
 
         return audioSmartMapper.toPayload(audio, audioLikeService.isLiked(audioId, user));
+    }
+
+    public void authorizeAccess(Long audioId, @Nullable Long userId) {
+        var audio = audioRepository.findById(audioId)
+                .orElseThrow(() -> new NotFoundException("Audio with id " + audioId + " was not found"));
+
+        visibilityAccessManager.authorize(userId, audio);
     }
 
     @Transactional
@@ -202,7 +219,7 @@ public class AudioService {
         Page<Audio> audioPage = audioRepository.findAudioFromPlaylistProtected(playlistId, user, pageable);
 
         var liked = user == null ? new HashSet<Long>() :
-            audioLikeService.likedFromBulk(audioPage.stream().map(Audio::getId).collect(Collectors.toSet()), user);
+                audioLikeService.likedFromBulk(audioPage.stream().map(Audio::getId).collect(Collectors.toSet()), user);
 
         return audioPage.map(it -> audioSmartMapper.toPayload(it, liked.contains(it.getId())));
     }

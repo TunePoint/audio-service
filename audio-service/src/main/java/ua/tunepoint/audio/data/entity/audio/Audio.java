@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import ua.tunepoint.audio.data.entity.AccessibleEntity;
 import ua.tunepoint.audio.data.entity.Genre;
 import ua.tunepoint.audio.data.entity.Tag;
@@ -33,6 +34,7 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = {"id"})
+@ToString(of = {"id", "title"})
 public class Audio implements AccessibleEntity {
 
     @Id

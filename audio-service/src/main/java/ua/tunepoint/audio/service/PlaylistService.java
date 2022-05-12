@@ -38,6 +38,7 @@ import ua.tunepoint.web.exception.BadRequestException;
 import ua.tunepoint.web.exception.NotFoundException;
 
 import javax.annotation.Nullable;
+import javax.validation.constraints.Null;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -150,38 +151,48 @@ public class PlaylistService {
     public Page<PlaylistPayload> findByOwner(Long ownerId, Pageable pageable, UserPrincipal user) {
         var owner = userService.findUser(ownerId)
                 .orElseThrow(() -> new NotFoundException("user with id " + ownerId + " was not found"));
-        var page =  playlistRepository.findByOwnerIdWithProtected(ownerId, extractId(user), pageable);
+        var page = playlistRepository.findByOwnerIdWithProtected(ownerId, extractId(user), pageable);
 
         var liked = user == null ? new HashSet<Long>() :
-                playlistLikeService.likedFromBulk(page.stream().map(Playlist::getId).collect(Collectors.toSet()), extractId(user));
+                playlistLikeService.likedFromBulk(page.stream().map(Playlist::getId)
+                        .collect(Collectors.toSet()), extractId(user));
 
         return page.map(it -> playlistSmartMapper.toPayload(it, owner, liked.contains(it.getId())));
     }
 
     public Page<PlaylistPayload> findByUserLiked(Long userId, Pageable pageable, Long clientId) {
         var page = playlistRepository.findPlaylistLikedByUserProtected(userId, clientId, pageable);
+        return mapToPayload(page, clientId);
+    }
 
+    public Page<PlaylistPayload> findByContainingAudio(Long audioId, @Nullable Long clientId, Pageable pageable) {
+        var page = playlistRepository.findPlaylistsContainingAudioProtected(audioId, clientId, pageable);
+        return mapToPayload(page, clientId);
+    }
+
+    private Page<PlaylistPayload> mapToPayload(Page<Playlist> page, Long clientId) {
         var liked = clientId == null ? new HashSet<Long>() :
-                playlistLikeService.likedFromBulk(page.stream().map(Playlist::getId).collect(Collectors.toSet()), clientId);
+                playlistLikeService.likedFromBulk(page.stream().map(Playlist::getId)
+                        .collect(Collectors.toSet()), clientId);
 
         return page.map(it -> playlistSmartMapper.toPayload(it, liked.contains(it.getId())));
     }
 
     @Transactional
     public void like(Long playlistId, Long clientId) {
-         var playlistAccessible = playlistRepository.findById(playlistId, PlaylistAccessibleEntity.class)
-                 .orElseThrow(NotFoundException::new);
+        var playlistAccessible = playlistRepository.findById(playlistId, PlaylistAccessibleEntity.class)
+                .orElseThrow(NotFoundException::new);
 
-         playlistInteractionAccessManager.authorize(clientId, playlistAccessible);
-         commonVisibilityAccessManager.authorize(clientId, playlistAccessible);
+        playlistInteractionAccessManager.authorize(clientId, playlistAccessible);
+        commonVisibilityAccessManager.authorize(clientId, playlistAccessible);
 
-         var likeIdentity = new PlaylistLikeIdentity(playlistId, clientId);
-         if (playlistLikeRepository.existsById(likeIdentity)) {
-             throw new BadRequestException("Like is already set");
-         }
+        var likeIdentity = new PlaylistLikeIdentity(playlistId, clientId);
+        if (playlistLikeRepository.existsById(likeIdentity)) {
+            throw new BadRequestException("Like is already set");
+        }
 
-         var like = playlistMapper.toLike(likeIdentity);
-         playlistLikeRepository.save(like);
+        var like = playlistMapper.toLike(likeIdentity);
+        playlistLikeRepository.save(like);
 
         eventPublisher.publish(
                 PLAYLIST.getName(),
@@ -335,6 +346,12 @@ public class PlaylistService {
         }
     }
 
+    public void authorizeAccess(Long playlistId, @Nullable Long userId) {
+        var playlist = playlistRepository.findById(playlistId, AccessibleEntity.class)
+                .orElseThrow(() -> new NotFoundException("playlist with id " + playlistId + " was not found"));
+        commonVisibilityAccessManager.authorize(userId, playlist);
+    }
+
     private PlaylistTagContext playlistTagContext(Long playlistId, Long tagId) {
         var playlist = playlistRepository.findById(playlistId)
                 .orElseThrow(
@@ -382,7 +399,7 @@ public class PlaylistService {
     }
 
     public List<PlaylistPayload> searchBulk(List<Long> ids, @Nullable Long clientId) {
-        var bulk =  playlistRepository.findBulk(ids);
+        var bulk = playlistRepository.findBulk(ids);
 
         var liked = clientId == null ? new HashSet<Long>() :
                 playlistLikeService.likedFromBulk(bulk.stream().map(Playlist::getId).collect(Collectors.toSet()), clientId);
@@ -393,7 +410,8 @@ public class PlaylistService {
                 .collect(Collectors.toList());
     }
 
-    private static record PlaylistUpdateContext(PlaylistAccessibleEntity playlist, AccessibleEntity audio) { }
+    private static record PlaylistUpdateContext(PlaylistAccessibleEntity playlist, AccessibleEntity audio) {
+    }
 
     private static record PlaylistTagContext(Playlist playlist, Tag tag) {
     }

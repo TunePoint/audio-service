@@ -29,6 +29,7 @@ public interface AudioMapper {
             @Mapping(target = "content", source = "content"),
             @Mapping(target = "likeCount", source = "audio.statistics.likeCount"),
             @Mapping(target = "listeningCount", source = "audio.statistics.listeningCount"),
+            @Mapping(target = "commentCount", source= "audio.statistics.commentCount"),
             @Mapping(target = "uploadedTime", source = "audio.uploadedTime"),
             @Mapping(target = "genres", source = "audio.genres"),
             @Mapping(target = "tags", source = "audio.tags"),
