@@ -31,7 +31,7 @@ public interface PlaylistRepository extends PagingAndSortingRepository<Playlist,
     Page<Playlist> findPlaylistLikedByUserProtected(Long userId, Long clientId, Pageable pageable);
 
     @Query("""
-            SELECT p FROM Playlist p JOIN PlaylistAudio a ON a.id.audioId = :audioId
+            SELECT p FROM Playlist p JOIN PlaylistAudio a ON p.id = a.id.playlistId AND a.id.audioId = :audioId
             WHERE p.isPrivate = false OR p.ownerId = :clientId
             ORDER BY p.createdAt DESC
             """)
