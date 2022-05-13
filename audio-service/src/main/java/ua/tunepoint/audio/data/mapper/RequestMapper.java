@@ -45,6 +45,9 @@ public interface RequestMapper {
         return AudioType.withName(requestType.toString());
     }
 
+    @Mappings({
+            @Mapping(target = "authorName", source = "authorPseudonym")
+    })
     void mergeEntity(@MappingTarget Audio entity, AudioUpdateRequest request);
 
     @Mappings({
