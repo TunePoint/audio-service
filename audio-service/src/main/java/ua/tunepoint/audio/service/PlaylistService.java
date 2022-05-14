@@ -2,6 +2,7 @@ package ua.tunepoint.audio.service;
 
 import liquibase.repackaged.org.apache.commons.collections4.CollectionUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -38,7 +39,6 @@ import ua.tunepoint.web.exception.BadRequestException;
 import ua.tunepoint.web.exception.NotFoundException;
 
 import javax.annotation.Nullable;
-import javax.validation.constraints.Null;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -56,6 +56,7 @@ import static ua.tunepoint.audio.utils.EventUtils.toUpdatedEvent;
 import static ua.tunepoint.audio.utils.UserUtils.extractId;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class PlaylistService {
 
@@ -156,6 +157,8 @@ public class PlaylistService {
         var liked = user == null ? new HashSet<Long>() :
                 playlistLikeService.likedFromBulk(page.stream().map(Playlist::getId)
                         .collect(Collectors.toSet()), extractId(user));
+
+        log.info("Fetched liked playlists: {}", liked);
 
         return page.map(it -> playlistSmartMapper.toPayload(it, owner, liked.contains(it.getId())));
     }
