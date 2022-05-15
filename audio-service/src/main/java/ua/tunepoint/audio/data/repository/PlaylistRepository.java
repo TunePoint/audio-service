@@ -27,7 +27,7 @@ public interface PlaylistRepository extends PagingAndSortingRepository<Playlist,
 
     <T> Set<T> findByManagerTypeAndOwnerId(ManagerType type, Long ownerId, Class<T> projection);
 
-    @Query("SELECT p FROM Playlist p LEFT JOIN PlaylistLike pl ON pl.identity.playlistId = p.id AND pl.identity.userId = :userId AND (p.isPrivate = false OR p.ownerId = :clientId) ORDER BY pl.createdAt DESC")
+    @Query("SELECT p FROM Playlist p JOIN PlaylistLike pl ON pl.identity.playlistId = p.id AND pl.identity.userId = :userId AND (p.isPrivate = false OR p.ownerId = :clientId) ORDER BY pl.createdAt DESC")
     Page<Playlist> findPlaylistLikedByUserProtected(Long userId, Long clientId, Pageable pageable);
 
     @Query("""
