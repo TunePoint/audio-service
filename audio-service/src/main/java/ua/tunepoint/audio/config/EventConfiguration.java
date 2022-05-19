@@ -2,13 +2,11 @@ package ua.tunepoint.audio.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import ua.tunepoint.audio.event.AudioEventConsumer;
 import ua.tunepoint.audio.model.event.AudioCommentEventType;
 import ua.tunepoint.audio.model.event.AudioEventType;
 import ua.tunepoint.audio.model.event.PlaylistEventType;
 import ua.tunepoint.auth.model.event.AuthEventType;
 import ua.tunepoint.event.starter.DomainRelation;
-import ua.tunepoint.event.starter.handler.DomainEventHandlers;
 import ua.tunepoint.event.starter.registry.DomainRegistry;
 import ua.tunepoint.event.starter.registry.builder.DomainRegistryBuilder;
 
@@ -28,10 +26,7 @@ public class EventConfiguration {
                 .register(
                         AUDIO.getName(),
                         AudioEventType.values(),
-                        Set.of(
-                                DomainRelation.PRODUCER,
-                                DomainRelation.CONSUMER
-                        )
+                        Set.of(DomainRelation.PRODUCER)
                 )
                 .register(
                         AUDIO_COMMENT.getName(),
@@ -49,10 +44,5 @@ public class EventConfiguration {
                         Set.of(DomainRelation.CONSUMER)
                 )
                 .build();
-    }
-
-    @Bean
-    public DomainEventHandlers domainEventHandlers(AudioEventConsumer consumer) {
-        return consumer.eventHandlers();
     }
 }
