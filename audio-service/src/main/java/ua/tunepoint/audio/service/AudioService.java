@@ -89,6 +89,20 @@ public class AudioService {
         return savedAudio.getId();
     }
 
+    @Transactional
+    public void delete(Long id, @NotNull Long userId) {
+        var audio = audioRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("audio with id " + id + " was not found"));
+
+        updateAccessManager.authorize(userId, audio);
+
+        audioRepository.delete(audio);
+
+        publisher.publish(AUDIO.getName(),
+                singletonList(EventUtils.toDeletedEvent(audio))
+        );
+    }
+
     public Page<AudioPayload> findRecentListenings(Long userId, Pageable pageable) {
         var recentListenings = audioRepository.findRecentListenings(userId, pageable);
 

@@ -108,8 +108,14 @@ public class AudioController {
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<IdResponse> postAudio(@RequestBody AudioPostRequest request, @AuthenticationPrincipal UserPrincipal user) {
         var id = audioService.save(request, extractId(user));
-
         return ResponseEntity.ok(IdResponse.withId(id));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<StatusResponse> deleteAudio(@PathVariable Long id, @AuthenticationPrincipal UserPrincipal user) {
+        audioService.delete(id, extractId(user));
+        return ResponseEntity.ok(StatusResponse.builder().build());
     }
 
     @PutMapping("/{id}")
