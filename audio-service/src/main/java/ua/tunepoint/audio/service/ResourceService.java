@@ -23,6 +23,9 @@ public class ResourceService {
 
     @CircuitBreaker(name = "resource-service")
     public Optional<Resource> getImage(String id) {
+        if (id == null) {
+            return Optional.empty();
+        }
 
         var response = client.getImage(id);
         if (response == null) {
