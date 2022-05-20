@@ -16,6 +16,12 @@ public interface AudioRepository extends PagingAndSortingRepository<Audio, Long>
 
     Page<Audio> findAudioByOwnerIdAndIsPrivateFalse(Long ownerId, Pageable pageable);
 
+    @Query(
+            """
+            SELECT a FROM Audio a WHERE a.ownerId = :ownerId 
+            ORDER BY a.uploadedTime DESC
+            """
+    )
     Page<Audio> findAudioByOwnerId(Long ownerId, Pageable pageable);
 
     @Query("SELECT a FROM Audio a WHERE a.id IN :ids")
