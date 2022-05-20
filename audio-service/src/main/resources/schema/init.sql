@@ -60,7 +60,7 @@ CREATE TABLE audio.audio_likes
 CREATE TABLE audio.audio_listening
 (
     user_id INTEGER NOT NULL,
-    audio_id INTEGER REFERENCES audio.audio(id),
+    audio_id INTEGER REFERENCES audio.audio(id) ON DELETE CASCADE,
     listening_count INTEGER NOT NULL DEFAULT 0,
     last_listening_time TIMESTAMP,
 
